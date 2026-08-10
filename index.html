@@ -155,7 +155,10 @@
     width:100%;
   }
   .divider{background:var(--line);}
-  .sidebar{--side-pad:48px;padding:44px 8px 44px var(--side-pad);position:relative;}
+  .sidebar{
+    --side-pad:48px;padding:44px 8px 44px var(--side-pad);
+    position:relative;z-index:800;background:var(--bg);
+  }
   .main{padding:44px 56px;min-width:0;position:relative;}
   .right{
     padding:44px 40px 44px 32px;
@@ -200,26 +203,42 @@
   }
   .blur-curtain.active{display:block;}
 
-  /* Full-viewport fixed overlay — outside the grid entirely, so it can
-     never push/resize any layout underneath it. top/left/bottom are set
-     dynamically in JS (positionPaywallOverlay) to hug the header's bottom
-     border, the footer's top border, and the sidebar's right edge exactly
-     — recomputed on open/scroll/resize so header, footer, and sidebar nav
-     always stay visible and clickable, at any scroll position. z-index
-     sits below the header (1000) and mobile-menu close button (1001) so
-     those remain reachable even while this is open. */
+  /* Full-viewport fixed layer, split in two:
+     .paywall-overlay mirrors .layout's own max-width + margin:auto
+     centering exactly — on any viewport wider than 1680px, .layout
+     centers itself with equal margins on both sides, and a naive
+     hardcoded `left` value (relative to the raw viewport) completely
+     ignores that offset, silently drifting into the sidebar on wide
+     screens (the actual root cause here). Mirroring the same centering
+     recipe keeps this box's left/right edges pixel-identical to
+     .layout's at any width, so the inner .paywall-blur's offset (below)
+     is always measured from the *correct* starting point.
+     .paywall-blur is the actual visible/functional blur — offset from
+     that already-correctly-centered box by the sidebar+divider width
+     (adjusted per breakpoint below), so it can never land on the sidebar
+     regardless of viewport width. z-index sits below the header (1000)
+     and mobile-menu close button (1001) so those stay reachable; .sidebar
+     and .footer also carry their own elevated z-index + opaque background
+     (see above / below) as a second, independent safety net. */
   .paywall-overlay{
     display:none;
     position:fixed;
-    top:0;left:241px;right:0;bottom:0;
+    top:0;bottom:0;left:0;right:0;
+    max-width:1680px;
+    margin:0 auto;
     z-index:700;
-    align-items:center;
-    justify-content:center;
+    pointer-events:none;
+  }
+  .paywall-overlay.open{display:block;}
+  .paywall-blur{
+    position:absolute;
+    top:0;bottom:0;left:241px;right:0;
+    display:flex;align-items:center;justify-content:center;
+    pointer-events:auto;
     background-color:rgba(255,255,255,.2);
     backdrop-filter:blur(4px);
     -webkit-backdrop-filter:blur(4px);
   }
-  .paywall-overlay.open{display:flex;}
   .paywall-modal{
     position:relative;
     width:100%;max-width:400px;
@@ -490,6 +509,7 @@
   .footer{
     border-top:1px solid var(--line);
     flex-shrink:0;
+    position:relative;z-index:800;background:var(--bg);
   }
   .footer-inner{
     display:flex;justify-content:space-between;align-items:center;
@@ -551,6 +571,7 @@
   @media (max-width:1200px){
     .layout{grid-template-columns:220px 1px minmax(0,1fr);}
     .right{display:none;}
+    .paywall-blur{left:221px;}
   }
   @media (max-width:840px){
     .top-inner{padding:20px 24px;}
@@ -559,6 +580,7 @@
     .layout{grid-template-columns:1fr;}
     .divider{display:none;}
     .sidebar{display:none;}
+    .paywall-blur{left:0;}
     .main{padding:32px 24px;}
     h1.title{font-size:30px;}
     p.subtitle{font-size:16px;}
@@ -605,12 +627,14 @@
 </div>
 
 <div class="paywall-overlay" id="password-overlay">
-  <div class="paywall-modal">
-    <h2>Protected Case Study</h2>
-    <p>Please enter the password provided in my resume to unlock.</p>
-    <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
-    <button type="button" class="password-submit" id="password-submit">Unlock</button>
-    <div class="password-error" id="password-error"></div>
+  <div class="paywall-blur">
+    <div class="paywall-modal">
+      <h2>Protected Case Study</h2>
+      <p>Please enter the password provided in my resume to unlock.</p>
+      <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
+      <button type="button" class="password-submit" id="password-submit">Unlock</button>
+      <div class="password-error" id="password-error"></div>
+    </div>
   </div>
 </div>
 
@@ -1276,36 +1300,6 @@ function isCurrentPageLocked(){
   return currentView === "case" && !!(project && project.protected) && !isUnlocked();
 }
 
-// Keeps the paywall overlay's bounds hugging exactly against the header's
-// bottom border, the footer's top border, and #main-content's own left
-// edge — so header, footer, and sidebar (including its divider border)
-// all stay fully visible and clickable no matter where the page is
-// scrolled to, at any viewport width. Recomputed on open, on scroll, and
-// on resize (header/footer aren't sticky, so their on-screen position
-// genuinely changes as the page scrolls — this tracks that rather than
-// assuming a fixed page-load value).
-function positionPaywallOverlay(){
-  const overlay = document.getElementById("password-overlay");
-  if (!overlay || !overlay.classList.contains("open")) return;
-
-  const header = document.querySelector("header.top");
-  const footer = document.querySelector(".footer");
-  const mainEl = document.getElementById("main-content");
-  const vh = window.innerHeight;
-
-  const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
-  const footerTop = footer ? footer.getBoundingClientRect().top : vh;
-  const bottomGap = Math.max(0, vh - footerTop);
-
-  overlay.style.top = headerBottom + "px";
-  overlay.style.bottom = bottomGap + "px";
-  // Anchor directly to where the content column itself starts — this is
-  // correct by construction at any breakpoint (desktop: right after the
-  // sidebar + its divider; mobile: 0, since .main spans full width there),
-  // with no need to separately reason about sidebar/divider widths.
-  overlay.style.left = mainEl ? Math.max(0, mainEl.getBoundingClientRect().left) + "px" : "0px";
-}
-
 // Applies (or clears) the blur/lock state for the page currently on screen.
 // Only #main-content and #right-sidebar are ever touched — header and
 // sidebar navigation stay fully interactive regardless of lock state. The
@@ -1322,10 +1316,6 @@ function updateProtectionUI(){
   if (mainCurtain) mainCurtain.classList.toggle("active", shouldLock);
   if (rightCurtain) rightCurtain.classList.toggle("active", shouldLock);
   document.getElementById("password-overlay").classList.toggle("open", shouldLock);
-  if (shouldLock) {
-    positionPaywallOverlay();
-    setTimeout(positionPaywallOverlay, 100);
-  }
 
   const errorEl = document.getElementById("password-error");
   const inputEl = document.getElementById("password-input");
@@ -1965,7 +1955,6 @@ window.addEventListener("resize", ()=>{
   figResizeTimer = setTimeout(()=>{
     if (figMode === "vertical") syncCurrentFigLayout();
   }, 150);
-  positionPaywallOverlay();
 });
 
 if (document.fonts && document.fonts.ready) {
@@ -1975,15 +1964,6 @@ if (document.fonts && document.fonts.ready) {
 }
 
 window.addEventListener("scroll", onFigScroll, { passive: true });
-
-let paywallScrollRAF = null;
-window.addEventListener("scroll", ()=>{
-  if (paywallScrollRAF) return;
-  paywallScrollRAF = requestAnimationFrame(()=>{
-    paywallScrollRAF = null;
-    positionPaywallOverlay();
-  });
-}, { passive: true });
 </script>
 </body>
 </html>
