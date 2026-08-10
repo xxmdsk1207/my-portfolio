@@ -156,36 +156,40 @@
   }
   .divider{background:var(--line);}
   .sidebar{--side-pad:48px;padding:44px 8px 44px var(--side-pad);position:relative;}
-  .main-wrap{position:relative;min-width:0;}
-  .main{padding:44px 56px;min-width:0;}
-  .right-wrap{position:relative;align-self:start;}
-  .right-wrap.mode-vertical{align-self:auto;}
+  .main{padding:44px 56px;min-width:0;position:relative;}
   .right{
     padding:44px 40px 44px 32px;
     position:sticky;
     top:44px;
+    align-self:start;
   }
   /* Vertical mode lifts the sticky constraint off the whole column — each
      figure item becomes its own sticky element instead (see below). */
-  .right.mode-vertical{position:static;}
+  .right.mode-vertical{position:static;align-self:auto;}
 
   /* ---------- Password-protected page lock ---------- */
   /* Applied to #main-content and #right-sidebar only — sidebar and header
      are never touched, so navigation always stays fully usable even while
-     a page is locked. This never touches filter/position on the content
-     itself (that broke position:sticky figure positioning last time round
-     — `filter` makes an element a new containing block for its
-     position:sticky/fixed descendants, which threw off every image's
-     alignment). Interaction is still fully disabled here; the visual blur
-     is a separate layer (see .blur-curtain below). */
+     a page is locked. This never touches filter/position on .main/.right
+     (that broke position:sticky figure positioning previously — `filter`
+     makes an element a new containing block for its position:sticky/fixed
+     descendants, which threw off every image's alignment). Interaction is
+     still fully disabled here; the visual blur is a separate curtain child
+     (see .blur-curtain below), regenerated as part of each render rather
+     than living in a wrapper div — an earlier wrapper-based approach
+     shrank .right's containing box down to match its own short sticky
+     content, which silently broke the "tall track" sticky needs to travel
+     within while scrolling (Stack/Horizontal view's whole point). Anchoring
+     the curtain to .main/.right directly, as their own child, avoids that
+     entirely since neither element's own box/positioning changes at all. */
   .main.is-locked, .right.is-locked{
     pointer-events:none;
     user-select:none;
   }
-  /* Sits directly on top of .main / .right (same box, via the position:
-     relative wrapper), blurring whatever renders underneath via
-     backdrop-filter — a real visual blur with zero effect on the content's
-     own layout, so sticky figures/text stay exactly where they should. */
+  /* Sits directly on top of .main / .right's own content (same box, exact
+     match, no separate wrapper needed), blurring whatever renders
+     underneath via backdrop-filter — a real visual blur with zero effect
+     on the content's own layout/positioning. */
   .blur-curtain{
     display:none;
     position:absolute;inset:0;
@@ -207,7 +211,7 @@
   .paywall-overlay{
     display:none;
     position:fixed;
-    top:0;left:240px;right:0;bottom:0;
+    top:0;left:241px;right:0;bottom:0;
     z-index:700;
     align-items:center;
     justify-content:center;
@@ -593,17 +597,11 @@
 
   <div class="divider" id="left-divider"></div>
 
-  <div class="main-wrap">
-    <main class="main" id="main-content"></main>
-    <div class="blur-curtain" id="main-blur-curtain"></div>
-  </div>
+  <main class="main" id="main-content"></main>
 
   <div class="divider" id="right-divider"></div>
 
-  <div class="right-wrap">
-    <aside class="right" id="right-sidebar"></aside>
-    <div class="blur-curtain" id="right-blur-curtain"></div>
-  </div>
+  <aside class="right" id="right-sidebar"></aside>
 </div>
 
 <div class="paywall-overlay" id="password-overlay">
@@ -1279,18 +1277,20 @@ function isCurrentPageLocked(){
 }
 
 // Keeps the paywall overlay's bounds hugging exactly against the header's
-// bottom border, the footer's top border, and the sidebar's right edge —
-// so all three stay visible and clickable no matter where the page is
-// scrolled to. Recomputed on open, on scroll, and on resize (header/footer
-// aren't sticky, so their on-screen position genuinely changes as the page
-// scrolls — this tracks that rather than assuming a fixed page-load value).
+// bottom border, the footer's top border, and #main-content's own left
+// edge — so header, footer, and sidebar (including its divider border)
+// all stay fully visible and clickable no matter where the page is
+// scrolled to, at any viewport width. Recomputed on open, on scroll, and
+// on resize (header/footer aren't sticky, so their on-screen position
+// genuinely changes as the page scrolls — this tracks that rather than
+// assuming a fixed page-load value).
 function positionPaywallOverlay(){
   const overlay = document.getElementById("password-overlay");
   if (!overlay || !overlay.classList.contains("open")) return;
 
   const header = document.querySelector("header.top");
   const footer = document.querySelector(".footer");
-  const sidebar = document.querySelector(".sidebar");
+  const mainEl = document.getElementById("main-content");
   const vh = window.innerHeight;
 
   const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
@@ -1299,12 +1299,11 @@ function positionPaywallOverlay(){
 
   overlay.style.top = headerBottom + "px";
   overlay.style.bottom = bottomGap + "px";
-
-  if (sidebar && getComputedStyle(sidebar).display !== "none") {
-    overlay.style.left = sidebar.getBoundingClientRect().right + "px";
-  } else {
-    overlay.style.left = "0px";
-  }
+  // Anchor directly to where the content column itself starts — this is
+  // correct by construction at any breakpoint (desktop: right after the
+  // sidebar + its divider; mobile: 0, since .main spans full width there),
+  // with no need to separately reason about sidebar/divider widths.
+  overlay.style.left = mainEl ? Math.max(0, mainEl.getBoundingClientRect().left) + "px" : "0px";
 }
 
 // Applies (or clears) the blur/lock state for the page currently on screen.
@@ -1318,10 +1317,15 @@ function updateProtectionUI(){
 
   document.getElementById("main-content").classList.toggle("is-locked", shouldLock);
   document.getElementById("right-sidebar").classList.toggle("is-locked", shouldLock);
-  document.getElementById("main-blur-curtain").classList.toggle("active", shouldLock);
-  document.getElementById("right-blur-curtain").classList.toggle("active", shouldLock);
+  const mainCurtain = document.getElementById("main-blur-curtain");
+  const rightCurtain = document.getElementById("right-blur-curtain");
+  if (mainCurtain) mainCurtain.classList.toggle("active", shouldLock);
+  if (rightCurtain) rightCurtain.classList.toggle("active", shouldLock);
   document.getElementById("password-overlay").classList.toggle("open", shouldLock);
-  if (shouldLock) positionPaywallOverlay();
+  if (shouldLock) {
+    positionPaywallOverlay();
+    setTimeout(positionPaywallOverlay, 100);
+  }
 
   const errorEl = document.getElementById("password-error");
   const inputEl = document.getElementById("password-input");
@@ -1567,10 +1571,9 @@ function renderRightSidebar(p){
   currentFigs = p.figs;
   activeFigIndex = 0;
   const right = document.getElementById("right-sidebar");
-  const rightWrap = right.closest(".right-wrap");
   right.classList.toggle("mode-vertical", figMode === "vertical");
-  if (rightWrap) rightWrap.classList.toggle("mode-vertical", figMode === "vertical");
-  right.innerHTML = renderModeSwitch() + (figMode === "vertical" ? renderFigListVertical(p.figs, p.figVerticalLayout) : renderFigCard(p.figs));
+  right.innerHTML = `<div class="blur-curtain" id="right-blur-curtain"></div>` +
+    renderModeSwitch() + (figMode === "vertical" ? renderFigListVertical(p.figs, p.figVerticalLayout) : renderFigCard(p.figs));
   document.getElementById("right-divider").style.display = "";
   right.style.display = "";
   if (figMode === "vertical") {
@@ -1872,6 +1875,7 @@ function playEntrance(){
 function renderProject(p){
   const execHeading = p.execHeading || "Executive Summary";
   document.getElementById("main-content").innerHTML = `
+    <div class="blur-curtain" id="main-blur-curtain"></div>
     <div class="eyebrow">${p.eyebrow}</div>
     <h1 class="title">${p.title}${p.status ? `<span class="status-pill">${p.status}</span>`:''}</h1>
     <p class="subtitle">${p.subtitle}</p>
