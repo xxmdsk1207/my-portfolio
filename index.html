@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ye Design</title>
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fdfdfb;
+    --panel:#f5f4f1;
+    --ink:#3A3A3A;
+    --ink-soft:#4a4a4b;
+    --gray:#8c8b86;
+    --gray-light:#b7b6b1;
+    --line:#e4e3de;
+    --line-strong:#1a1a1a;
+    --serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none;}
+  #main-content img{max-width:100%;height:auto;object-fit:contain;}
+  .eyebrow, .label, nav.top a, .sidebar-title, .sidebar-sub, .fig-cap, .footer, .nav-item .meta{
+    font-family:var(--sans);
+    letter-spacing:.06em;
+  }
+
+  /* ---------- Header ---------- */
+  header.top{
+    position:relative;
+    z-index:1000;
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .top-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    max-width:1680px;margin:0 auto;
+    padding:26px 40px 26px 48px;
+  }
+  header.top .brand{
+    font-family:var(--sans);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  header.top .brand span{color:var(--gray);font-weight:600;}
+  nav.top{display:flex;gap:32px;font-size:13px;text-transform:none;letter-spacing:.02em;}
+  nav.top a{color:var(--gray-light);cursor:pointer;padding-bottom:4px;transition:color .15s;}
+  nav.top a:hover{color:var(--ink);}
+  nav.top a.active{color:var(--ink);font-weight:700;border-bottom:1px solid var(--ink);}
+
+  /* Hamburger (mobile only — see responsive section). Lives inside the
+     header, which sits above the overlay (z-index:1000 vs. 900), so the
+     icon stays visible and clickable — including once it morphs to an
+     X — the whole time the menu is open. */
+  .hamburger-btn{
+    display:none;
+    flex-direction:column;justify-content:center;align-items:center;gap:5px;
+    width:32px;height:32px;padding:0;background:none;border:none;cursor:pointer;
+  }
+  .hamburger-bar{
+    display:block;width:20px;height:1.5px;background:var(--ink);
+    transition:transform .25s ease, opacity .2s ease;
+  }
+  .hamburger-btn.open .hamburger-bar:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+  .hamburger-btn.open .hamburger-bar:nth-child(2){opacity:0;}
+  .hamburger-btn.open .hamburger-bar:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+
+  /* Full-screen mobile nav overlay */
+  .mobile-menu{
+    position:fixed;inset:0;z-index:900;
+    background:var(--bg);
+    display:flex;align-items:flex-start;justify-content:flex-start;
+    overflow-y:auto;
+    opacity:0;visibility:hidden;
+    transition:opacity .25s ease, visibility 0s linear .25s;
+  }
+  .mobile-menu.open{opacity:1;visibility:visible;transition:opacity .25s ease;}
+  /* Dedicated close affordance inside the overlay itself, independent of
+     the header's hamburger/X icon — always visible top-right whenever the
+     menu is open. */
+  .mobile-menu-close{
+    position:fixed;top:20px;right:24px;z-index:1001;
+    display:flex;align-items:center;justify-content:center;
+    width:36px;height:36px;
+    background:none;border:1px solid var(--line);border-radius:50%;
+    font-family:var(--sans);font-size:16px;color:var(--ink);cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .mobile-menu-close:hover{border-color:var(--ink);}
+  .mobile-menu-content{
+    text-align:left;
+    display:flex;flex-direction:column;align-items:flex-start;gap:32px;
+    padding:100px 32px 60px;
+    width:100%;
+  }
+  /* Same color logic as the desktop sidebar: the active view/category/item
+     stays full-ink; everything else dims to gray (category-level) or
+     gray-light (item-level) — same variables, same hierarchy. */
+  .mobile-menu-top-link{
+    display:block;
+    font-family:var(--sans);
+    font-size:19px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--gray-light);cursor:pointer;
+    padding:4px 0;
+    transition:color .15s ease;
+  }
+  .mobile-menu-top-link.active{color:var(--ink);}
+  .mobile-menu-category{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;}
+  .mobile-menu-cat-title{
+    font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--gray);
+    margin-bottom:12px;
+    transition:color .15s ease;
+  }
+  .mobile-menu-category.is-active-category .mobile-menu-cat-title{color:var(--ink);}
+  .mobile-menu-links{display:flex;flex-direction:column;align-items:flex-start;width:100%;}
+  .mobile-menu-link{
+    display:block;
+    font-family:var(--sans);font-size:17px;line-height:1.4;
+    color:var(--gray-light);cursor:pointer;
+    padding:9px 0;
+    transition:color .15s ease;
+  }
+  .mobile-menu-link:hover{color:var(--ink-soft);}
+  .mobile-menu-link.active{color:var(--ink);font-weight:600;}
+  @media (min-width:841px){
+    .mobile-menu{display:none !important;}
+    .mobile-menu-close{display:none !important;}
+  }
+
+  /* ---------- Layout grid ---------- */
+  .layout{
+    display:grid;
+    grid-template-columns:240px 1px minmax(0,1fr) 1px 440px;
+    gap:0;
+    max-width:1680px;
+    margin:0 auto;
+    flex:1 0 auto;
+    width:100%;
+  }
+  .divider{background:var(--line);}
+  .sidebar{--side-pad:48px;padding:44px 8px 44px var(--side-pad);position:relative;}
+  .main-wrap{position:relative;min-width:0;}
+  .main{padding:44px 56px;min-width:0;}
+  .right-wrap{position:relative;align-self:start;}
+  .right-wrap.mode-vertical{align-self:auto;}
+  .right{
+    padding:44px 40px 44px 32px;
+    position:sticky;
+    top:44px;
+  }
+  /* Vertical mode lifts the sticky constraint off the whole column — each
+     figure item becomes its own sticky element instead (see below). */
+  .right.mode-vertical{position:static;}
+
+  /* ---------- Password-protected page lock ---------- */
+  /* Applied to #main-content and #right-sidebar only — sidebar and header
+     are never touched, so navigation always stays fully usable even while
+     a page is locked. This never touches filter/position on the content
+     itself (that broke position:sticky figure positioning last time round
+     — `filter` makes an element a new containing block for its
+     position:sticky/fixed descendants, which threw off every image's
+     alignment). Interaction is still fully disabled here; the visual blur
+     is a separate layer (see .blur-curtain below). */
+  .main.is-locked, .right.is-locked{
+    pointer-events:none;
+    user-select:none;
+  }
+  /* Sits directly on top of .main / .right (same box, via the position:
+     relative wrapper), blurring whatever renders underneath via
+     backdrop-filter — a real visual blur with zero effect on the content's
+     own layout, so sticky figures/text stay exactly where they should. */
+  .blur-curtain{
+    display:none;
+    position:absolute;inset:0;
+    z-index:50;
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    pointer-events:none;
+  }
+  .blur-curtain.active{display:block;}
+
+  /* Full-viewport fixed overlay — outside the grid entirely, so it can
+     never push/resize any layout underneath it. top/left/bottom are set
+     dynamically in JS (positionPaywallOverlay) to hug the header's bottom
+     border, the footer's top border, and the sidebar's right edge exactly
+     — recomputed on open/scroll/resize so header, footer, and sidebar nav
+     always stay visible and clickable, at any scroll position. z-index
+     sits below the header (1000) and mobile-menu close button (1001) so
+     those remain reachable even while this is open. */
+  .paywall-overlay{
+    display:none;
+    position:fixed;
+    top:0;left:240px;right:0;bottom:0;
+    z-index:700;
+    align-items:center;
+    justify-content:center;
+    background-color:rgba(255,255,255,.2);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+  }
+  .paywall-overlay.open{display:flex;}
+  .paywall-modal{
+    position:relative;
+    width:100%;max-width:400px;
+    margin:0 24px;
+    background:rgba(253,253,251,.85);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border:1px solid rgba(255,255,255,.6);
+    border-radius:20px;
+    padding:40px 34px;
+    box-shadow:0 20px 40px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.05);
+    text-align:center;
+  }
+  .paywall-modal h2{
+    font-family:var(--serif);font-size:22px;font-weight:800;
+    margin:0 0 10px;color:var(--ink);
+  }
+  .paywall-modal p{
+    font-family:var(--sans);font-size:13.5px;line-height:1.6;
+    color:var(--ink-soft);margin:0 0 24px;
+  }
+  .password-input{
+    width:100%;padding:12px 14px;
+    font-family:var(--sans);font-size:15px;color:var(--ink);
+    background:rgba(255,255,255,.6);
+    border:1px solid var(--line);border-radius:9px;
+    margin-bottom:12px;
+    transition:border-color .15s ease;
+  }
+  .password-input:focus{outline:none;border-color:var(--ink);}
+  .password-submit{
+    width:100%;padding:12px 14px;
+    font-family:var(--sans);font-size:12.5px;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;
+    background:var(--ink);color:#fff;
+    border:none;border-radius:9px;cursor:pointer;
+    transition:opacity .15s ease;
+  }
+  .password-submit:hover{opacity:.85;}
+  .password-submit:disabled{opacity:.5;cursor:default;}
+  .password-error{
+    font-family:var(--sans);font-size:12.5px;color:#b3402f;
+    margin-top:12px;min-height:16px;
+  }
+
+  /* Mode switcher (Stack / Vertical) pinned to the top of the sidebar,
+     independent of which mode is active. */
+  .fig-mode-switch{
+    position:sticky;top:44px;z-index:5;
+    display:flex;gap:6px;
+    background:transparent;
+    padding-bottom:14px;margin-bottom:8px;
+  }
+  .fig-mode-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:30px;height:30px;padding:0;
+    border:1px solid var(--line);background:var(--bg);color:var(--gray-light);
+    cursor:pointer;transition:color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .fig-mode-btn svg{width:15px;height:15px;stroke:currentColor;}
+  .fig-mode-btn:hover{color:var(--ink-soft);}
+  .fig-mode-btn.active{color:var(--ink);border-color:var(--ink);background:var(--panel);}
+
+  /* Vertical feed: each figure gets its own sticky slot so it pins while
+     its matching section of narrative is being read, then hands off to
+     the next figure as the reader scrolls past it. Offset sits below the
+     mode-switch bar (~44px tall incl. padding) so images never tuck under it. */
+  .fig-vertical-list{display:flex;flex-direction:column;}
+  .fig-item-wrap{position:relative;}
+  .fig-item{position:sticky;top:88px;padding-bottom:26px;}
+  .fig-item--static{position:static;padding-bottom:26px;}
+
+  /* ---------- Left sidebar ---------- */
+  /* Category groups (Enterprise Case Studies / Independent & Labs) share
+     identical styling via the same title/subtitle/list classes; only the
+     spacing between groups differs, and only the currently-active
+     category's title stays fully dark — the other dims out (but a shade
+     darker than the subtitle below it, so title vs. subtitle stays legible
+     even while de-emphasized). */
+  .nav-category + .nav-category{margin-top:36px;}
+  .sidebar-title{
+    font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink);
+    transition:color .15s ease;
+  }
+  .nav-category.is-inactive-category .sidebar-title{color:var(--gray);}
+  .sidebar-sub{font-size:12px;color:var(--gray-light);margin-top:6px;margin-bottom:30px;}
+  /* nav-list is pulled flush to the sidebar's outer (page) edge, then each
+     item's text is padded back in to align with the sidebar title above it. */
+  .nav-list{list-style:none;margin:0 0 0 calc(var(--side-pad) * -1);padding:0;}
+  .nav-item{
+    display:block;
+    padding:14px 8px 14px var(--side-pad);
+    cursor:pointer;
+    color:var(--gray-light);
+    transition:color .15s;
+  }
+  .nav-item .label-text{
+    font-family:var(--sans);
+    font-size:13.5px;
+    line-height:1.35;
+    font-weight:600;
+  }
+  .nav-item.active{color:var(--ink);}
+  .nav-item:not(.active):hover{color:var(--ink-soft);}
+
+  /* ---------- Main content ---------- */
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gray);margin-bottom:18px;}
+  .status-pill{
+    display:inline-block;font-family:var(--sans);font-size:10.5px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
+    border:1px solid var(--line-strong);padding:4px 10px;border-radius:2px;margin-left:12px;
+    vertical-align:middle;
+  }
+  h1.title{
+    font-size:44px;line-height:1.12;font-weight:700;margin:0 0 26px 0;letter-spacing:-.01em;
+  }
+  p.subtitle{
+    font-size:19px;line-height:1.55;color:var(--ink-soft);max-width:640px;margin:0 0 46px 0;
+  }
+  .section-head{
+    font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    font-family:var(--sans);
+    border-bottom:1px solid var(--line);
+    padding-bottom:12px;margin:52px 0 22px 0;
+  }
+  .section-head:first-of-type{margin-top:0;}
+  p.body-text{font-size:16px;line-height:1.8;color:var(--ink);margin:0 0 18px 0;max-width:680px;}
+  .kpi-grid{
+    display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);margin-bottom:6px;
+  }
+  .kpi-cell{
+    padding:26px 30px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .kpi-cell:nth-child(2n){border-right:none;}
+  .kpi-cell:nth-last-child(-n+2){border-bottom:none;}
+  .kpi-label{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;}
+  .kpi-value{font-size:30px;font-weight:700;margin-bottom:10px;}
+  .kpi-desc{font-size:13.5px;line-height:1.5;color:var(--ink-soft);}
+  blockquote.pull{
+    border-left:2px solid var(--ink);
+    margin:30px 0;padding:2px 0 2px 24px;
+    font-style:italic;font-size:18px;line-height:1.6;color:var(--ink-soft);max-width:640px;
+  }
+  ul.bullets{margin:0 0 20px 0;padding-left:20px;max-width:680px;}
+  ul.bullets li{font-size:16px;line-height:1.75;color:var(--ink);margin-bottom:10px;}
+  ul.bullets li strong{color:var(--ink);}
+
+  /* ---------- Right sidebar: dynamic tabbed figure card ---------- */
+  .fig-card{margin-bottom:8px;}
+  .fig-tabs{
+    display:flex;flex-wrap:nowrap;align-items:center;gap:2px;
+    font-family:var(--sans);font-size:10.5px;letter-spacing:.06em;
+    margin-bottom:10px;
+    overflow-x:auto;
+    scroll-behavior:smooth;
+    scrollbar-width:none;      /* Firefox */
+    -ms-overflow-style:none;   /* old Edge/IE */
+  }
+  .fig-tabs::-webkit-scrollbar{display:none;} /* Chrome/Safari */
+  .fig-tab{
+    background:none;border:none;font-family:inherit;font-size:inherit;letter-spacing:inherit;
+    color:var(--gray-light);cursor:pointer;padding:4px 2px;
+    border-bottom:2px solid transparent;transition:color .15s ease, border-color .15s ease;
+    white-space:nowrap;flex:none;
+  }
+  .fig-tab:hover{color:var(--ink-soft);}
+  .fig-tab.active{color:var(--ink);font-weight:700;border-bottom-color:var(--ink);}
+  .fig-tab-sep{color:var(--line);padding:0 6px;flex:none;}
+  .fig-stage{
+    position:relative;width:100%;aspect-ratio:16/10;
+    border:0;border-radius:8px;overflow:hidden;cursor:zoom-in;
+    transition:transform .6s cubic-bezier(.16,1,.3,1), box-shadow .6s ease;
+  }
+  .fig-card.is-highlighted .fig-stage,
+  .fig-item.is-highlighted .fig-stage{
+    transform:scale(1.02);
+    box-shadow:0 0 0 3px rgba(24,24,26,.08);
+  }
+  .fig-img{
+    position:absolute;inset:0;
+    background:repeating-linear-gradient(135deg, #eceae4 0 2px, #f3f2ee 2px 14px);
+    display:flex;align-items:center;justify-content:center;color:var(--gray-light);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  .fig-img.active{opacity:1;pointer-events:auto;}
+  .fig-img img{width:100%;height:100%;object-fit:cover;display:block;}
+
+  /* Auto-fit variant (vertical mode only): height adapts to the image's own
+     aspect ratio instead of being cropped into the fixed 16:10 box, so a
+     tall screenshot displays in full at a fixed width. */
+  .fig-stage--auto{aspect-ratio:auto;height:auto;}
+  .fig-stage--auto .fig-img{
+    position:relative;inset:auto;opacity:1;pointer-events:auto;
+  }
+  .fig-stage--auto .fig-img img{width:100%;height:auto;object-fit:contain;display:block;}
+  .fig-cap{display:flex;justify-content:space-between;margin-top:10px;font-size:10.5px;}
+  .fig-cap b{font-weight:700;letter-spacing:.05em;color:var(--ink);}
+  .fig-cap span{color:var(--gray-light);}
+
+  /* Inline text-to-image hotspot badge */
+  /* Invisible marker used only to cap a preceding figure's sticky span so
+     it can't bleed into the following section — not shown, not clickable. */
+  .fig-boundary{display:block;height:0;}
+  /* Invisible marker used to align a fig's sticky-pin start with a precise
+     word or heading in the narrative, independent of paragraph/phase
+     boundaries — not shown, not clickable. inline-block keeps it valid
+     whether used mid-paragraph or standalone before a heading. */
+  .fig-anchor{display:inline-block;width:0;height:0;overflow:hidden;vertical-align:top;}
+
+  .fig-link{
+    display:inline-block;
+    font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.05em;
+    color:var(--ink-soft);background:var(--panel);
+    border:1px solid var(--line);border-radius:3px;
+    padding:1px 7px;margin:0 1px;cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .fig-link:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  /* ---------- Lightbox modal ---------- */
+  .lightbox{
+    position:fixed;inset:0;z-index:1000;
+    background:rgba(12,12,11,.94);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;visibility:hidden;
+    transition:opacity .25s ease, visibility 0s linear .25s;
+  }
+  .lightbox.open{opacity:1;visibility:visible;transition:opacity .25s ease;}
+  .lightbox-inner{width:100%;max-width:min(90vw,960px);padding:0 24px;}
+  .lightbox-stage{
+    width:100%;aspect-ratio:16/10;
+    background:transparent;
+    border:none;color:#9b9a95;
+    display:flex;align-items:center;justify-content:center;
+    transform:scale(.96);transition:transform .5s cubic-bezier(.16,1,.3,1);
+  }
+  .lightbox.open .lightbox-stage{transform:scale(1);}
+  .lightbox-stage img{width:100%;height:100%;object-fit:contain;display:block;}
+  .lightbox-cap{
+    margin-top:20px;text-align:center;font-family:var(--sans);
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#d6d5d0;
+  }
+  .lightbox-close{
+    position:absolute;top:28px;right:36px;
+    background:none;border:1px solid #57564f;color:#d6d5d0;
+    font-family:var(--sans);font-size:11px;letter-spacing:.08em;
+    padding:8px 14px;cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .lightbox-close:hover{border-color:#d6d5d0;color:#fff;}
+
+  /* ---------- Page-load entrance animation ---------- */
+  .eyebrow, h1.title, p.subtitle, p.body-text, .about-title{
+    opacity:0;
+    transform:translateY(12px);
+    transition:opacity .4s cubic-bezier(0.16,1,0.3,1), transform .4s cubic-bezier(0.16,1,0.3,1);
+  }
+  #main-content.is-visible .eyebrow{opacity:1;transform:translateY(0);transition-delay:.02s;}
+  #main-content.is-visible h1.title,
+  #main-content.is-visible .about-title{opacity:1;transform:translateY(0);transition-delay:.08s;}
+  #main-content.is-visible p.subtitle{opacity:1;transform:translateY(0);transition-delay:.14s;}
+  #main-content.is-visible p.body-text{opacity:1;transform:translateY(0);transition-delay:.2s;}
+  #main-content.is-visible p.body-text:nth-of-type(2){transition-delay:.24s;}
+  #main-content.is-visible p.body-text:nth-of-type(3){transition-delay:.28s;}
+
+  /* ---------- Footer ---------- */
+  .footer{
+    border-top:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .footer-inner{
+    display:flex;justify-content:space-between;align-items:center;
+    max-width:1680px;margin:0 auto;padding:26px 48px;
+    font-size:12px;color:var(--gray-light);
+  }
+  .footer .socials{display:flex;gap:24px;}
+  .footer a:hover{color:var(--ink);}
+
+  /* Sub-heading used inside a numbered section to label a phase/stage
+     (e.g. "Phase 1 — ..."). Sized between body copy and a section head. */
+  .phase-head{
+    font-family:var(--serif);
+    font-size:18.5px;font-weight:700;color:var(--ink);
+    margin:18px 0 12px 0;
+  }
+  .section-head + .phase-head{margin-top:0;}
+
+  /* ---------- About view ("My Story") ---------- */
+  body.view-about .sidebar,
+  body.view-about #left-divider{display:none;}
+  /* Right column is hidden on About regardless of width, so reclaim its
+     440px grid track here too (previously this only happened ≤1200px,
+     wasting that width on every larger screen). */
+  body.view-about .layout{grid-template-columns:minmax(0,1fr);}
+  body.view-about .main{max-width:1320px;}
+
+  .about-grid{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:56px;
+    align-items:start;
+    margin-top:96px;
+  }
+  .about-left{}
+  .about-title{
+    font-family:var(--serif);
+    font-size:clamp(140px, 20vw, 380px);
+    font-weight:800;
+    line-height:0.85;
+    margin:0;
+    white-space:nowrap;
+  }
+  .about-right{max-width:680px;}
+  .about-right p.body-text{
+    max-width:680px;
+    font-size:16.5px;
+    line-height:1.75;
+    margin:0 0 1.5rem 0;
+  }
+  .about-right p.body-text:last-child{margin-bottom:0;}
+
+  @media (max-width:900px){
+    .about-grid{grid-template-columns:1fr;gap:24px;margin-top:48px;}
+    .about-title{font-size:clamp(56px, 20vw, 110px);white-space:normal;}
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:1200px){
+    .layout{grid-template-columns:220px 1px minmax(0,1fr);}
+    .right{display:none;}
+  }
+  @media (max-width:840px){
+    .top-inner{padding:20px 24px;}
+    nav.top{display:none;}
+    .hamburger-btn{display:flex;}
+    .layout{grid-template-columns:1fr;}
+    .divider{display:none;}
+    .sidebar{display:none;}
+    .main{padding:32px 24px;}
+    h1.title{font-size:30px;}
+    p.subtitle{font-size:16px;}
+    .kpi-grid{grid-template-columns:1fr;}
+    .kpi-cell{border-right:none !important;}
+    .footer-inner{flex-direction:column;gap:12px;padding:22px 24px;text-align:center;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand" onclick="showAbout()">YE WANG <span>— SENIOR UX DESIGNER &amp; DESIGN ENGINEER</span></div>
+    <nav class="top">
+      <a id="nav-cases" class="active" onclick="showCaseStudies()">Case Studies</a>
+      <a id="nav-about" onclick="showAbout()">My Story</a>
+    </nav>
+    <button type="button" id="hamburger-btn" class="hamburger-btn" aria-label="Menu" aria-expanded="false" onclick="toggleMobileMenu()">
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button type="button" class="mobile-menu-close" aria-label="Close menu" onclick="closeMobileMenu()">✕</button>
+  <div class="mobile-menu-content" id="mobile-menu-content"></div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="nav-groups" id="nav-groups"></div>
+  </aside>
+
+  <div class="divider" id="left-divider"></div>
+
+  <div class="main-wrap">
+    <main class="main" id="main-content"></main>
+    <div class="blur-curtain" id="main-blur-curtain"></div>
+  </div>
+
+  <div class="divider" id="right-divider"></div>
+
+  <div class="right-wrap">
+    <aside class="right" id="right-sidebar"></aside>
+    <div class="blur-curtain" id="right-blur-curtain"></div>
+  </div>
+</div>
+
+<div class="paywall-overlay" id="password-overlay">
+  <div class="paywall-modal">
+    <h2>Protected Case Study</h2>
+    <p>Please enter the password provided in my resume to unlock.</p>
+    <input type="password" id="password-input" class="password-input" placeholder="Enter password" autocomplete="off">
+    <button type="button" class="password-submit" id="password-submit">Unlock</button>
+    <div class="password-error" id="password-error"></div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>© 2026 YE WANG. All rights reserved.</div>
+    <div class="socials">
+      <!-- TODO: replace href with your real LinkedIn profile URL -->
+      <a href="https://www.linkedin.com/in/yewang1207" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <!-- TODO: replace href with the path/URL to your resume PDF (e.g. "resume.pdf" or a hosted link) -->
+      <a href="Resume_Ye_Wang.pdf" target="_blank" rel="noopener noreferrer">ReadCV</a>
+    </div>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">[ ESC / CLOSE ]</button>
+  <div class="lightbox-inner">
+    <div class="lightbox-stage" id="lightbox-stage"></div>
+    <div class="lightbox-cap" id="lightbox-cap"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   PROJECT DATA
+   Sourced from the three uploaded case-study documents.
+--------------------------------------------------------- */
+const PROJECTS = [
+  {
+    id: "dispute",
+    num: "01",
+    category: "enterprise",
+    protected: true,
+    navLabel: "Dispute Resolution Platform",
+    eyebrow: "Case Study / Fintech · Merchant Services",
+    title: "Automating Chargeback Resolution: Transitioning to a Self-Serve Platform",
+    status: null,
+    subtitle: "A 0→1 platform redesign that hands merchants full ownership of the chargeback lifecycle — with AI carrying weight on the response side — built around two fundamentally different audiences, Merchants and Internal Operators, sharing one unified system. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>",
+    meta: [
+      ["Role", "Product Designer (sole designer, 0→1)"],
+      ["Scope", "End-to-end platform redesign — information architecture, multi-role UX, AI-assisted workflows, component system"],
+      ["Collaborators", "Project lead, TPM, BPM, engineering"]
+    ],
+    execHeading: "01/The starting point",
+    execSummary: [
+      "Chargeback representment had always been a managed service — merchants filed a dispute, and a team behind the scenes assembled and submitted the response on their behalf. The business wanted to flip that model: give merchants a self-serve platform (DR) to own the entire dispute lifecycle themselves, with AI carrying some of the weight on the response side."
+    ],
+    kpis: null,
+    sections: [
+      {
+        headingRaw: "02/Why this was harder than it looked on paper",
+        paras: [
+          "Two things made this project genuinely difficult, and neither of them was about visual design.",
+          "<!-- HIDDEN FIG_02 anchor — restore by removing this comment: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_02\"></span> --><strong>No anchor to react to.</strong> Most redesigns have a predecessor to critique — you can point at what's confusing and propose something better. Here, there wasn't a clean interface to react to, but there wasn't nothing either: a platform did exist, it just didn't support much beyond the bare minimum. Registering as a merchant meant filling out long forms; submitting evidence meant uploading files and then waiting — a slow, people-heavy process stitched on top of software that couldn't carry it on its own. The UI itself hadn't been touched in years: dense forms and stacked cards with no real hierarchy. Every flow and edge case still had to be invented from scratch, then tested against whether it held up without a human on the other end to explain things. <!-- HIDDEN FIG_02 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span> --> The real task was building a chargeback platform from nothing, covering everything the managed service used to handle while opening new ground it never touched.",
+          "<!-- HIDDEN FIG_03 anchor — restore by removing this comment: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_03\"></span> --><strong>The platform also had to serve several different roles at once, coherently.</strong> DR's real fault line wasn't between two flavors of the same job — it was between two fundamentally different audiences sharing one system under role-based access control. Merchants are the platform's external customers, logging in to review disputes, work the AI-assisted evidence flow, and decide whether to fight a case or let it go. Internal Operators — the risk and platform team — sit behind that layer, monitoring SLAs across the whole portfolio and configuring the automation that drives it. Same system, two audiences with almost nothing in common in terms of what they came to do. <!-- HIDDEN FIG_03 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span> -->"
+        ]
+      },
+      {
+        headingRaw: "03/How the work actually happened",
+        phases: [
+          {
+            title: "Phase 1 — Rearchitecting the Information Hierarchy (From Flat to 3-Tier)",
+            anchorFor: "FIG_02",
+            paras: [
+              "The PM's early sketches and sitemap captured what needed to exist, but not the logic connecting it — hierarchy was flat where it needed to branch, and some flows assumed a mental model that didn't match how merchants actually think about a dispute. Before designing a single screen, that material was reverse-engineered into a 3-tier information architecture: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span>"
+            ],
+            bullets: [
+              "<strong>Global Tier</strong> — persistent navigation and real-time system status, so users always have context-aware orientation.",
+              "<strong>Dashboard Tier</strong> — high-level KPIs, win-rate trends, and case distribution, built for at-a-glance oversight.",
+              "<strong>Action Tier</strong> — a task-driven to-do list and notification panel with direct deep-links into the exact case or flow that needs attention."
+            ],
+            after: [
+              "This layer is invisible in a portfolio screenshot, but it's what determines whether the product feels obvious or exhausting — and it became the foundation everything else in the platform had to fit into."
+            ]
+          },
+          {
+            title: "Phase 2 — Multi-Role System Alignment",
+            anchorFor: "FIG_03",
+            paras: [
+              "With the tiers already designed, splitting the experience for two audiences was mostly a matter of definition, not invention. Once the information architecture was settled, extending it into a merchant view and an internal-operator view was a smooth continuation of work already done, not a parallel build — the same three tiers, expressed at two different densities depending on who's logged in. <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span>",
+              "That split shaped the IA directly, through progressive disclosure rather than two separate builds:"
+            ],
+            bullets: [
+              "<strong>Merchant View — deliberately narrow.</strong> Navigation holds only what a merchant needs to make a decision: Dashboard, Disputes, Accounts, Settings, Help/FAQ. Every dispute funnels toward one clear fork — Respond with evidence or Accept the loss — inside a visible 7-day countdown, with everything else pushed out of the way.",
+              "<strong>Internal Operator View — deliberately deep.</strong> The same shell gains a Configuration layer — processors, CRM connections, SLA thresholds, and the rules engine — because operators are managing the system, not a single case."
+            ],
+            after: [
+              "The risk being designed against was letting these two views drift into separate products — one lightweight, one dense, stitched together under the same name and quietly doubling the maintenance surface for engineering. Instead, both views draw from a single component library, expressed at two different densities depending on who's logged in. That's the actual design win here: one system, two audiences, no duplicated build."
+            ]
+          },
+          {
+            title: "Phase 3 — Human-in-the-Loop AI Integration",
+            boundaryFor: "FIG_03",
+            /* HIDDEN — restore by uncommenting: anchorFor: "FIG_06", */
+            paras: [
+              "PMs gave the constraints: a multi-step submission flow, a 7-day deadline, and real-time win-rate signal. The design job was the how — and the AI had to serve each audience differently, kept tight so it supported the architecture rather than competing with it: <!-- HIDDEN FIG_06 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_06\">[FIG_06]</span> -->"
+            ],
+            bullets: [
+              "<strong>Smart Draft Safety Net (merchant-facing)</strong> — pre-fills a representment draft from the reason code and evidence on file when a merchant hits Respond, lowering the effort to act, then auto-submits it if they haven't finished by the 7-day deadline: 100% compliance, zero missed deadlines by design, not by reminder.",
+              "<strong>Real-Time Motivation Loop (merchant-facing)</strong> — the estimated win rate sits directly beside the evidence upload step, not buried in a report. Watching the score move in response to what they add nudges merchants toward a complete submission on the first pass, and keeps the AI feeling like something they can trust and edit rather than a black box to accept as-is.",
+              "<strong>Rules configuration (operator-facing)</strong> — Internal Operators don't interact with the draft itself; they configure the conditions under which the AI engages in the first place, through the rules engine in Configuration. The AI shows up to merchants as a real-time assist, and to operators as a set of governable automation rules."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "04/Extending the Design System",
+        paras: [
+          "<span class=\"fig-anchor\" data-fig-anchor=\"FIG_04\"></span>When component work started, the ask was open-ended: a \"modern, visually engaging\" platform for internal users, with no fixed spec. That ambiguity was direction, not a gap — visual polish was the goal, brand continuity was the constraint. <span class=\"fig-link\" data-fig=\"FIG_04\">[FIG_04]</span>",
+          "I used the company's existing design system as the foundation, preserving core brand colors, and extended a specialized component library on top of it — presenting multiple directions rather than a single take, so stakeholders could react to real options instead of abstractions."
+        ]
+      },
+      {
+        headingRaw: "05/Impact & Takeaways",
+        boundaryFor: "FIG_04",
+        paras: [
+          "The platform is in active development, built directly on this design. Post-launch metrics aren't in yet, so success at this stage is measured the way you have to at this point: alignment and execution efficiency."
+        ],
+        bullets: [
+          "<strong>Unanimous sign-off</strong> from PM leadership and cross-functional reviewers — raw, fragmented requirements turned into an architecture everyone could agree on.",
+          "<strong>Zero-friction engineering handoff</strong> — edge cases, tokens, and specs were defined up front, so the frontend team built from the design with minimal back-and-forth.",
+          "<strong>Positive internal reception</strong> — in walkthroughs, Internal Operators specifically called out how smooth and clear the workflow felt, describing it as a notably elevated experience over what they were used to."
+        ]
+      },
+      {
+        headingRaw: "06/What I Took From It",
+        paras: [
+          "The visual system mattered, but it was the last ten percent. The real work was sitting with messy, flat requirements, figuring out the actual shape of the problem across multiple roles, and building an architecture that could absorb new scope without breaking. That's the part of the job that rarely shows up in a portfolio screenshot — and the part I'm most interested in continuing to do."
+        ]
+      }
+    ],
+    figs: [
+      ["FIG_01: PLATFORM_FINAL_UI", "0.58MB", "images/Dashboard_DR.png", "auto"],
+      /* HIDDEN (originally FIG_02/FIG_03, before renumbering) — restoring
+         these will require renumbering all active figs below again:
+      ["FIG_02: LEGACY_PROCESS_AUDIT", "0.44MB", "images/legacy.png"],
+      ["FIG_03: ROLE_SPLIT_OVERVIEW", "0.39MB", "images/fig_03.png"],
+      */
+      ["FIG_02: 3-TIER_IA_MAP", "0.51MB", "images/legacy-audit.png", "auto"],
+      ["FIG_03: MERCHANT_OPERATOR_VIEWS", "0.62MB", "images/roles_split.png", "auto"],
+      /* HIDDEN (originally FIG_06, before renumbering) — restoring this
+         will require renumbering active figs below again:
+      ["FIG_06: AI_ASSIST_FLOW", "0.57MB", "images/fig_06.png"],
+      */
+      ["FIG_04: DESIGN_SYSTEM_EXTENSION", "0.48MB", "images/design_system.png", "auto"]
+    ]
+  },
+  {
+    id: "portal",
+    num: "02",
+    category: "enterprise",
+    protected: true,
+    navLabel: "Ecosystem Partner Hub",
+    eyebrow: "Case Study / Enterprise Partnerships",
+    title: "Unifying Three Sub-Brands into a Single, Neutral Partner Onboarding Experience",
+    status: null,
+    subtitle: "<span class=\"fig-anchor\" data-fig-anchor=\"FIG_01\"></span>A 0-to-1 architecture consolidating three isolated partner sites into one portal — designed under a strict constraint that no product could visually outrank another. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>",
+    meta: [
+      ["Role", "Lead Product Designer &amp; Design Engineer"],
+      ["Timeline", "3–4 months"],
+      ["Scope", "0-to-1 architecture, cross-functional alignment, AEM authoring, front-end implementation"]
+    ],
+    execHeading: "01 / Executive Summary",
+    execSummary: [
+      "The enterprise operates three distinct sub-brands, each serving a different partner segment. Historically, each brand ran its own isolated domain, developer center, and partnership onboarding flow — meaning a technology partner evaluating options had to bounce between three separate sites just to compare solutions.",
+      "This project consolidated that fragmented experience into a single Tech Partner Portal: one entry point where partners can evaluate all three solutions side by side and choose the right one to register and integrate with. As the sole designer on the project, ownership spanned end-to-end — from information architecture and visual design through to hands-on front-end implementation inside Adobe Experience Manager (AEM), stepping into a design engineering role to get the build pixel-perfect."
+    ],
+    kpis: null,
+    sections: [
+      {
+        headingRaw: "02 / The Core Challenge: Designing for Equal Organizational Hierarchy",
+        paras: [
+          "The defining constraint on this project wasn't visual — it was political. The three sub-brands are parallel business units led by executives of equal seniority, and the product brief was explicit: the UI must never imply hierarchy among the three products. Every layout decision had to be defensible not just on UX merit, but on organizational neutrality."
+        ]
+      },
+      {
+        headingRaw: "03 / Three Design Solutions",
+        paras: ["<span class=\"fig-anchor\" data-fig-anchor=\"FIG_02\"></span>That constraint shaped three key design solutions: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span>"],
+        bullets: [
+          "<strong>Parallel Evaluation Grid — \"Choose Your Platform.\"</strong> A three-column, side-by-side comparison grid gives each solution identical visual real estate, typography scale, and content density — a neutral, apples-to-apples spec comparison before choosing a path.",
+          "<strong>Fluid Visual Rhythm — \"Open Up to the Possibilities.\"</strong> Rather than rigid dividers or a ranked list, an alternating split-screen pattern (left text / right video) repeated across three rows reinforces a shared ecosystem rather than forcing hard separation.",
+          "<strong>Role-Based Onboarding Tracks.</strong> The portal leads with explicit segment paths — Tech Partner, Service &amp; Solution Partner, and Financial Service Partner — each with its own \"who it's for,\" primary benefit, time-to-value, and monetization model called out up front."
+        ]
+      },
+      {
+        headingRaw: "04 / Design Engineering: Solving AEM's Rendering Limitations",
+        paras: [
+          "Translating the design into Adobe Experience Manager surfaced a hard technical ceiling: AEM's out-of-the-box card components were rigid, producing heavy dark borders, zero border-radius, misaligned inline icons, and irregular padding that broke the design system's standards."
+        ],
+        phases: [
+          {
+            title: "The workaround",
+            paras: [
+              "The workaround was discovering that AEM's Rich Text Editor (RTE) permitted raw HTML/CSS injection — stepping outside standard authoring constraints to hand-write custom markup and styles directly inside AEM, using Claude and Cline as AI coding co-pilots to accelerate the CSS/HTML work."
+            ]
+          },
+          /* HIDDEN — restore this entire phase by uncommenting:
+          {
+            title: "The &lt;table&gt; vs. &lt;div&gt; Bug",
+            anchorFor: "FIG_03",
+            paras: [
+              "Early AI-generated code relied on standard HTML <code>&lt;table&gt;</code> containers for the card layouts. It rendered correctly in raw HTML but broke in AEM — the preview and production CSS engine stripped border-radius and distorted padding on table-based markup, a CSS specificity conflict where AEM was actively suppressing modern table styling. The fix was refactoring the entire component from <code>&lt;table&gt;</code> elements to modern, flexbox-based <code>&lt;div&gt;</code> containers, which unlocked rounded corners, correct icon alignment, and proper padding natively inside the CMS. <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span>"
+            ]
+          },
+          */
+          {
+            title: "Attention to Detail: Cross-Environment QA",
+            anchorFor: "FIG_03",
+            paras: [
+              "During QA between the Lower (Dev) and Higher (Staging) environments, several UI icons rendered correctly in Lower but broke in Higher. Rather than filing a bug ticket and moving on, browser DevTools traced the image DOM paths across both environments. <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span>"
+            ],
+            bullets: [
+              "<strong>First batch of missing icons</strong> — resolved by working with the AEM developer to activate un-published asset dependencies.",
+              "<strong>Remaining broken icons</strong> — traced to a path discrepancy: the Lower environment referenced a dedicated asset folder that had never been mirrored to Higher, catching an infrastructure gap that would have otherwise shipped broken to production."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "05 / Hand-Off &amp; Impact",
+        boundaryFor: "FIG_03",
+        bullets: [
+          "<strong>0-to-1 delivery</strong> — 3–4 months in close alignment with PMs and developers to author and deploy the foundational pages inside AEM.",
+          "<strong>Architectural resilience</strong> — when product management later revised the Hero section visuals, the existing component structure, design tokens, and AEM authoring foundation let the team iterate without disturbing the underlying UX framework or CMS infrastructure.",
+          "<strong>Stakeholder alignment</strong> — unanimous sign-off across PM leadership and cross-functional teams, with zero-friction developer hand-off."
+        ]
+      },
+      {
+        headingRaw: "06 / What I Took From It",
+        bullets: [
+          "Designing for organizational neutrality is as much a constraint-solving exercise as it is a visual one — equal visual weight had to be engineered into the grid system, not just implied.",
+          "Recognizing when a CMS's default components can't meet the design bar is a design engineering skill in its own right — and knowing how to inject custom code safely (RTE-based HTML/CSS) can unblock a project without a platform rebuild.",
+          "Debugging shouldn't stop at \"file a ticket.\" Tracing the <code>&lt;table&gt;</code> vs. <code>&lt;div&gt;</code> rendering bug and the cross-environment asset path issue both came from going one layer deeper than the surface symptom.",
+          "A resilient component and token foundation pays off beyond launch — it's what let the team absorb a late-stage pivot on the Hero section without re-architecting the page."
+        ]
+      }
+    ],
+    figs: [
+      ["FIG_01: PORTAL_OVERVIEW", "0.55MB", "images/portal/fig_01.png", "auto"],
+      ["FIG_02: EVALUATION_GRID", "0.62MB", "images/Evaluation.png", "auto"],
+      /* HIDDEN (originally FIG_03, before renumbering) — restoring this
+         will require renumbering the active fig below again:
+      ["FIG_03: TABLE_VS_DIV_BUG", "0.47MB", "images/portal/fig_03.png"],
+      */
+      ["FIG_03: CROSS_ENV_QA_TRACE", "0.58MB", "images/CROSS_ENV_QA.png", "auto"]
+    ]
+  },
+  {
+    id: "wcag",
+    num: "03",
+    category: "enterprise",
+    protected: true,
+    navLabel: "Enterprise Design System",
+    eyebrow: "Case Study / Accessibility & Design Systems",
+    title: "Enterprise Design System Refactoring for WCAG 2.1 & ADA Compliance",
+    status: null,
+    subtitle: "<span class=\"fig-anchor\" data-fig-anchor=\"FIG_01\"></span>Rebuilding six state-heavy components and template — Button, Tab Menu, Tab, Icon Menu, Month-Year Picker, and Search Template — so every consuming team inherits AA compliance by default. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>",
+    meta: [
+      ["Role", "UX Designer &amp; Design Engineer"],
+      ["Scope", "Design System Architecture · Accessibility Standards (WCAG 2.1 AA) · Component Refactoring · Responsive Reflow · Agile Dev Collaboration"],
+      ["Team", "3 Designers, 1 Design Lead, embedded Front-End Engineering &amp; QA"]
+    ],
+    execHeading: "01 / Executive Summary &amp; Context",
+    execSummary: [
+      "<!-- HIDDEN FIG_02 anchor/badge — the fig this pointed to is hidden below; restore both together: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_02\"></span> -->When WCAG 2.1 was formalized as the compliance baseline, the sub-brand's legacy component library — built years earlier under a much looser accessibility standard — fell short in several load-bearing ways. Contrast ratios on interactive states were inconsistent, keyboard focus was often invisible or trapped incorrectly, and almost nothing in the library had been tested against the newer 1.4.10 Reflow criterion, which requires content to remain usable at 400% zoom without horizontal scrolling or clipped text. <!-- HIDDEN FIG_02 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span> -->",
+      /*"ADA compliance is a legal obligation for enterprise software, and this component library was the shared foundation underneath every product surface across the sub-brand — any gap here propagated everywhere the components were used. The mandate was to rebuild the system's accessibility DNA at the component level, covering five core components: Date Picker, Month-Year Picker, Search Template, Tab Menu, and Button (including its Split Button and Tab Button variants)."*/
+    ],
+    kpis: null,
+    sections: [
+      {
+        headingRaw: "02 / Governance &amp; Team Alignment",
+        paras: [
+          "Refactoring a design system with four people working in parallel carries an obvious risk: without shared conventions, four components can end up encoding the same accessibility rule four slightly different ways. Before any component work began, the team established a shared Style Guide — a single source of truth for focus ring treatment, error-state color and iconography, disabled-state opacity, and naming conventions for states — plus a Component Specification template so a component built by any of the three designers was structurally identical in how it communicated intent to engineering.",
+          "This governance layer is easy to undervalue in a case study because it doesn't produce a screenshot, but it's the reason the final library reads as one coherent system rather than four designers' individual interpretations stitched together."
+        ]
+      },
+      {
+        headingRaw: "03 / Deep-Dive: Refactoring for WCAG 2.1",
+        phases: [
+          {
+            title: "Contrast &amp; Color",
+            /* HIDDEN — restore by uncommenting: anchorFor: "FIG_03", */
+            paras: [
+              "Every interactive component was re-audited against WCAG 2.1's tiered contrast requirements: 4.5:1 minimum for body copy and text-based labels, and 3:1 minimum for graphical objects and UI component boundaries — a requirement introduced in 2.1 that the legacy system had never been tested against. In practice, this meant rebuilding the color tokens used for hover, pressed, and selected states across Buttons, Tab Menus, and form fields, so every interactive treatment cleared contrast requirements without color being the sole differentiator between states. <!-- HIDDEN FIG_03 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span> -->"
+            ]
+          },
+          {
+            title: "400% Zoom Reflow",
+            anchorFor: "FIG_02",
+            paras: [
+              "This was the most structurally demanding piece of the refactor. WCAG 2.1's reflow criterion effectively forces a \"mobile-first\" reflow logic onto components that were originally designed only for fixed desktop layouts."
+            ],
+            bullets: [
+              "<strong>Date Picker &amp; Month-Year Picker</strong> — the flat, side-by-side calendar layout doesn't survive 400% zoom, so both were restructured into single-column, stacked reflow patterns, with the Month-Year Picker's dropdown fields converting into full-width nested listboxes once space constraints kicked in. <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span>",
+              "<strong>Search Template</strong> — long labels that wrap to two lines shouldn't push adjacent short-label fields out of alignment; long-label fields get their own row, short-label fields stay grouped, with combobox fields converting to nested listboxes at 720px and below. <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span>",
+              "<strong>Tab Menu</strong> — at 400% and mobile widths, tab menus with long text labels needed defined wrapping behavior (three-line max before truncation) that preserved the selected-state indicator without visual clipping."
+            ]
+          },
+          {
+            title: "State Matrices",
+            paras: [
+              "Every component received a complete, explicit state matrix — Default, Hover, Focus (keyboard), Active/Pressed, Selected, Disabled, and Error — at both default and small size, and at 100% and 400% zoom, so no state only \"sort of\" existed by inference. The Focus state got dedicated attention: a high-contrast focus ring, visually distinct from hover and selection states, applied consistently across Date Pickers, Buttons, and Tab Menus so keyboard navigation was never ambiguous about where focus currently sat."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "04 / Cross-Functional Pipeline",
+        boundaryFor: "FIG_03",
+        paras: [
+          "Accessibility compliance fails most often at the handoff, not at the design desk — a beautifully specced focus ring is meaningless if it doesn't survive translation into code. The team worked inside a formal five-step pipeline: Design → Design ADA Test → Development → Dev ADA Test → QA, embedded in daily Agile standups so contrast or reflow issues were corrected within a day rather than surfacing weeks later in a sprint retro. Specs were annotated directly in Figma with state labels, ARIA attributes, and breakpoint behavior — treating the spec itself as a contract engineering could implement against."
+        ]
+      },
+      {
+        headingRaw: "05 / Systemic Impact &amp; Sub-Brand Scalability",
+        paras: [
+          "Because this work lived at the design-system layer rather than in any single product, the compliance gains weren't confined to one team's roadmap. The refactored components became the official accessibility-compliant baseline powering every platform and application across the sub-brand — any team consuming the library inherited WCAG 2.1 AA compliance automatically, without needing accessibility expertise of their own."
+        ],
+        closing: "That's the real measure of success for this kind of work: not a single polished screen, but a system where doing the accessible thing became the path of least resistance for every team downstream."
+      }
+    ],
+    figs: [
+      ["FIG_01: COMPONENT_LIBRARY_OVERVIEW", "0.53MB", "images/WCAG2.1_design_system.png", "auto"],
+      /* HIDDEN (originally FIG_02, exec-summary legacy audit) — restore by
+         uncommenting this and its anchor/badge above, then renumbering
+         the active figs below again:
+      ["FIG_02: LEGACY_COMPONENT_AUDIT", "0.49MB", "images/wcag/fig_02.png", "auto"],
+      */
+      /* HIDDEN (originally FIG_03, Contrast & Color) — restore by
+         uncommenting this and its anchor/badge above, then renumbering
+         the active figs below again:
+      ["FIG_03: CONTRAST_COMPLIANCE_STATES", "0.61MB", "images/wcag/fig_03.png", "auto"],
+      */
+      ["FIG_02: REFLOW_400_PERCENT_PICKER", "1.12MB", "images/reflow_month_picker.png", "auto"],
+      ["FIG_03: REFLOW_400_PERCENT_SEARCH", "0.44MB", "images/reflow_search_template.png", "auto"]
+      /* FIG_06: KEYBOARD_NAV_ARIA deleted along with the Keyboard Navigation
+         & Screen Reader Support section it illustrated (content removed
+         as factually inaccurate — not just hidden, so no restore comment). */
+    ]
+  },
+  {
+    id: "mshk",
+    num: "04",
+    category: "enterprise",
+    navLabel: "Microsoft E-Commerce Platform (HK)",
+    eyebrow: "Case Study / E-Commerce · Retail",
+    title: "Microsoft.HK E-Commerce Site Revamp: Redesigning the Path from Discovery to Purchase",
+    status: null,
+    subtitle: "<span class=\"fig-anchor\" data-fig-anchor=\"FIG_01\"></span>An end-to-end redesign of Microsoft.HK's storefront — tightening the path to purchase, cutting redundant content, and giving browse pages real filtering across the homepage, Product Detail Page, Product List Page, and Office Landing Page. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>",
+    meta: [
+      ["Role", "UX Researcher &amp; Interaction Designer — research, information architecture, wireframing, prototyping, user testing"],
+      ["Timeline", "~3 months, from research through mockup delivery"],
+      ["Team", "UX researcher/interaction designer (me), UI designer, development team"]
+    ],
+    execHeading: "01 / Executive Summary",
+    execSummary: [
+      "Microsoft.HK's e-commerce site — the storefront where customers browse and buy Surface devices, Xbox accessories, Office software, and peripherals — had grown into a confusing, redundant experience. This project covered the redesign of the site end-to-end, with a focus on how customers find, evaluate, and purchase products.",
+      "The existing site mirrored the visual patterns of other major e-commerce sites, but underneath the surface it broke down in three specific ways: no clear path to purchase, redundant content repeated across sections, and product list pages with no way to filter or narrow results. None of these were cosmetic — each one added friction at a different stage of the funnel: discovery, evaluation, and conversion."
+    ],
+    kpis: null,
+    sections: [
+      {
+        headingRaw: "02 / The Business Problem",
+        paras: [
+          "Customers who just wanted to buy a product quickly were fighting the page structure at every stage of the funnel:"
+        ],
+        bullets: [
+          "<strong>No clear path to purchase.</strong> Customers who just wanted to buy had to scroll through the entire page — accessories, comparisons, specs — before reaching the buy button.",
+          "<strong>Redundant content.</strong> Pages like the Office Landing Page repeated the same product descriptions and comparisons up to four times in different sections, adding scroll and cognitive load without adding value.",
+          "<strong>No filtering on browse pages.</strong> The Product List Page displayed only a single category at a time with no way to filter by product type, price, or color — forcing users to navigate all the way back to a parent page to compare different product types."
+        ]
+      },
+      {
+        headingRaw: "03 / Goals",
+        paras: ["Working with stakeholders, four success criteria defined the redesign:"],
+        bullets: [
+          "<strong>Clarity of navigation</strong> — make it obvious how to locate a specific item or product category.",
+          "<strong>Performance</strong> — increase page load speed by eliminating low-impact content.",
+          "<strong>Purchase efficiency</strong> — shorten the distance between \"found the product\" and \"completed the purchase.\"",
+          "<strong>Visual/UI optimization</strong> — bring information hierarchy in line with what actually matters to the customer."
+        ]
+      },
+      {
+        headingRaw: "04 / Research &amp; Analysis",
+        paras: [
+          "Before touching any wireframes, the existing site was audited page-by-page — interaction patterns, functional components, primary user flows, UI elements, and visual weighting — with the deep-dive focused on three page types that represent the core of the shopping journey: the Landing Page, the Product Detail Page (PDP), and the Product List Page (PLP)."
+        ],
+        phases: [
+          {
+            title: "Product Detail Page: the conversion bottleneck",
+            anchorFor: "FIG_02",
+            paras: [
+              "The PDP is the page where the purchase decision actually happens, so the original layout was broken into five content zones (A–E) to evaluate what was earning its screen real estate. <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span>",
+              "The finding: every zone was given roughly equal visual weight, when in reality only four of the five zones — product imagery, price/rating, spec selection, and the purchase action — mattered to a customer trying to buy. The \"Buy\" button itself was pushed to the bottom of a long page, forcing every customer, regardless of intent, to scroll past accessories and recommendations just to complete a purchase they'd already decided to make."
+            ],
+            bullets: [
+              "<strong>Key insight:</strong> Not every customer wants to browse accessories before buying — the page needed to support both the \"quick buy\" and \"browse everything\" paths without forcing users into one."
+            ]
+          },
+          {
+            title: "Office Landing Page: content redundancy",
+            anchorFor: "FIG_03",
+            paras: [
+              "Mapping the existing Office Landing Page structure into a paradigm diagram surfaced the same product descriptions and product comparisons appearing four separate times across the page in slightly different formats. This didn't just slow the page down — it actively confused users who weren't sure which comparison table to trust or where they'd already seen a given product. <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span>"
+            ],
+            bullets: [
+              "<strong>Key insight:</strong> Consolidating repeated content isn't just a performance win — it removes decision friction. One trustworthy comparison table beats four partial ones."
+            ]
+          },
+          {
+            title: "Product List Page: no way to narrow results",
+            anchorFor: "FIG_04",
+            paras: [
+              "The original PLP could only show one product category at a time, with a single, unoptimized \"Order by\" control and no filtering. A customer who started on the Surface page and wanted to compare it against a PC accessory had to abandon their place and start the flow over from a different parent page. <span class=\"fig-link\" data-fig=\"FIG_04\">[FIG_04]</span>"
+            ],
+            bullets: [
+              "<strong>Key insight:</strong> Filter and sort aren't \"nice to have\" utility features on a list page — they're core navigation. Without them, the site was forcing users to do the site's information architecture work manually."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "05 / Design &amp; Rebuild",
+        paras: [
+          "The guiding principle across every page redesign was that a customer should be able to act — view, compare, select, buy — without hesitation or unnecessary scrolling."
+        ],
+        phases: [
+          {
+            title: "Product Detail Page",
+            anchorFor: "FIG_05",
+            bullets: [
+              "Restructured the page hierarchy so imagery, price/rating, and the purchase path are immediately visible on load.",
+              "Broke product specifications (color, memory, hardware, RAM) into individual, tappable selectors instead of bundling every variant into one dropdown or button — so each choice is a discrete, low-friction interaction.",
+              "Moved accessories and recommended products below the primary purchase action, so they support the decision rather than block it.",
+              "Sketched the flow first, then built out detailed wireframes to formalize spacing, grouping, and the add-to-cart interaction, confirmed via a cart-updated state rather than a full navigation away from the page."
+            ]
+          },
+          {
+            title: "Product List Page",
+            anchorFor: "FIG_06",
+            bullets: [
+              "Added a persistent filter panel (category, price range, color) to the left side of the grid.",
+              "Rebuilt the sort/order control for both clarity and visual consistency.",
+              "Included a reset option so users could clear filters without reloading the page."
+            ]
+          },
+          {
+            title: "Office Landing Page",
+            bullets: [
+              "Moved the \"For Business\" / \"For Family\" segmentation to the top of the page, immediately under the hero, so users self-select their path early.",
+              "Collapsed four redundant comparison sections into a single comprehensive comparison table.",
+              "Preserved the advanced feature content (Word, PowerPoint, Excel deep dives) but restructured it to follow the consolidated comparison, rather than interrupting it."
+            ]
+          },
+          {
+            title: "Process",
+            paras: [
+              "The rebuild moved through six stages: teardown and annotation of existing pages to identify structural and content issues; paradigm and flow diagrams to visualize redundancy before proposing solutions; hand sketches to iterate quickly on new page structure; low-fidelity wireframes for the PDP, PLP, and Office LP, plus the remaining site pages; hand-off to UI design for visual design and collaboration with the development team through implementation; and post-launch user testing to validate against the original goals. <!-- HIDDEN FIG_08 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_08\">[FIG_08]</span> -->"
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "06 / Outcome &amp; Reflection",
+        /* HIDDEN — restore by uncommenting: anchorFor: "FIG_08", */
+        paras: [
+          "The redesign shipped as a full site revamp covering the homepage, Product Detail Pages, Product List Pages, and the Office Landing Page, among others. Post-launch testing was conducted to check the new site against the original four goals — navigational clarity, load speed, purchase efficiency, and visual optimization.",
+          "This project sat at the intersection of something personally and professionally familiar — long-time use of Microsoft's products meant a lot of the existing friction points were understood firsthand before the research even started. That familiarity was useful for generating hypotheses quickly, but every structural decision was still backed by the page-level teardown rather than assumption."
+        ],
+        closing: "The biggest lesson from this project: redundancy is a UX problem, not just a content problem. The Office Landing Page didn't fail because the information was wrong — it failed because the same information appeared in four different places with four different framings, and that repetition itself created doubt. Consolidating it wasn't about cutting content, it was about giving users one place to trust."
+      }
+    ],
+    figs: [
+      ["FIG_01: SITE_OVERVIEW", "0.51MB", "images/MS_final_ui.png", "auto"],
+      ["FIG_02: PDP_ZONE_TEARDOWN", "0.52MB", "images/PDP-original.jpg"],
+      ["FIG_03: OFFICE_LP_COMPARISON", "0.68MB", "images/landing-original.jpg"],
+      ["FIG_04: PLP_FILTER_REBUILD", "0.59MB", "images/PLP.png"],
+      ["FIG_05: PDP_REBUILD_WIREFRAME", "0.63MB", "images/PDP_wireframes.png"],
+      ["FIG_06: PLP_FILTER_PANEL", "0.47MB", "images/PLP_wireframes.png"],
+      ["FIG_07: OFFICE_LP_REBUILD", "0.66MB", "images/landing_wireframes.png"]
+      /* HIDDEN — restore by uncommenting:
+      ,["FIG_08: PROCESS_DELIVERY", "0.38MB", "images/mshk/fig_08.png"]
+      */
+    ],
+    figVerticalLayout: "static"
+  },
+  {
+    id: "snail",
+    num: "05",
+    category: "independent",
+    navLabel: "Aqua Life Guide",
+    eyebrow: "Case Study / Independent &amp; Labs · AI-Native Product Design",
+    title: "Mystery Snail Interactive Care &amp; Breeding Guide: Solo AI-Native Product Design &amp; Engineering",
+    status: null,
+    subtitle: "A solo, AI-orchestrated product build — from niche research through hand-written front-end engineering, CI/CD, and organic growth — solving real husbandry problems for Mystery Snail breeders.",
+    meta: [
+      ["Role", "AI-Native Product Designer &amp; Design Engineer (Solo Maker)"],
+      ["Stack", "HTML5/CSS3 Grid · JavaScript (ES6+) · Multi-AI Toolchain (Stitch, Claude, Gemini) · Git · Vercel Edge · GA4 · SEO / Schema.org"],
+      ["Live", "aquasnailbio.com"]
+    ],
+    execHeading: "01 / The Origin &amp; Niche Research",
+    execSummary: [
+      "Every product on this list started as a problem I actually had. This one started in a fish tank. As a hobbyist breeding Mystery Snails (Pomacea bridgesii), recurring husbandry failures kept showing up: shell erosion from pH and calcium imbalance, unpredictable nocturnal egg-laying behavior, and a narrow, unforgiving humidity window for successful clutch hatching. None of these are exotic problems — they're the exact friction points every aquarist in this niche hits.",
+      "What surprised me was how badly served the information layer around them was. A quick audit of the existing landscape confirmed it: the best available knowledge was scattered across early-2000s aquarium forums, half-abandoned blog posts, and fragmented Reddit threads — accurate in pieces, but nowhere assembled into something usable. Commercial aquatic retail sites, meanwhile, treated snails as an accessory product line: static care sheets, no interactivity, no tools for actually calculating anything a breeder needed in the moment. That gap — real domain depth, zero interactive tooling — became the hypothesis: build a modern, data-backed, interactive web app that solves actual hobbyist friction, not just another article restating the same forum wisdom in nicer formatting."
+    ],
+    kpis: null,
+    sections: [
+      {
+        headingRaw: "02 / Multi-AI Toolchain Orchestration",
+        paras: [
+          "The build philosophy from day one was AI as a design engineering partner, not a shortcut — using different models for what they're each structurally best at, rather than forcing one tool to do everything."
+        ],
+        phases: [
+          {
+            title: "Gemini — Domain Synthesis &amp; Data Modeling",
+            paras: [
+              "Before any interface work began, Gemini was used to synthesize the fragmented domain knowledge into something structurable: calcium dosing math, pH threshold ranges, and shell-genetics color-inheritance probabilities. This step mattered more than it sounds — an interactive guide is only as good as the data model underneath it, and that model needed to be scientifically defensible, not just scraped from a forum thread. Gemini also supported prompt engineering for the overall content architecture, mapping out how care topics, calculators, and breeding logic should relate to one another before a single component was designed. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>"
+            ]
+          },
+          {
+            title: "Stitch &amp; Claude — Rapid AI Layout Exploration",
+            paras: [
+              "With the content architecture defined, Stitch and Claude were used to generate multiple competing UI layout paradigms in parallel — card-stack interfaces, split-view data panels, dark-mode \"aquascape editorial\" themes. Rather than sketching one direction and iterating linearly, this produced several fully-formed visual hierarchies to evaluate side by side within minutes, each with different assumptions about information density and responsive behavior."
+            ]
+          },
+          {
+            title: "Selection &amp; Refinement",
+            paras: [
+              "The AI-generated candidates were evaluated against a single practical constraint: this app needed to hold dense aquatic data (dosing tables, breeding logs, care matrices) without becoming visually noisy. The grid-based architecture that best supported that density — clean data visualization first, decoration second — was selected and carried forward into engineering. This orchestration pattern — Gemini for domain rigor, Stitch/Claude for visual divergence, human judgment for convergence — compressed what would traditionally be a multi-week ideation phase into a matter of days, without sacrificing the depth of either the data model or the design exploration."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "03 / Technical Execution: Hand-Crafted Code vs. CMS",
+        phases: [
+          {
+            title: "Rejecting Low-Code CMS",
+            paras: [
+              "WordPress, Wix, and Webflow were deliberately ruled out. For an interactive, calculator-driven product, these platforms introduce constraints that work against the goal: bloated default codebases, weak Lighthouse performance scores out of the box, rigid limits on custom JS interaction patterns, and long-term platform lock-in. A tool meant to run live calculations for users needed to be built as an application, not assembled as a themed content page."
+            ]
+          },
+          {
+            title: "AI-Assisted Front-End Engineering",
+            paras: [
+              "Claude was used as the primary coding partner for hand-written, dependency-light front-end engineering — prompted to generate bespoke Vanilla JS logic for the app's core interactive features: a shell-health matrix calculator and a breeding phenotype simulator, both built on the data models Gemini helped structure earlier. Layout was implemented in modular CSS Grid, keeping components composable and easy to restructure as the content architecture evolved. <!-- HIDDEN FIG_02 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span> -->"
+            ]
+          },
+          {
+            title: "Custom SVG Pipeline",
+            paras: [
+              "Rather than pulling in an icon library, vector icons were hand-designed in Figma and optimized specifically for inline SVG rendering. This kept the asset footprint minimal and was a deliberate performance decision — the app was built to load in under a second, and every dependency was weighed against that budget. The result is a codebase with no CMS abstraction layer between the product and the browser: every interaction, from a dosing slider to a genetics probability output, is code that was reasoned about and reviewed line by line, not generated by a page builder."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "04 / Infrastructure, Deployment &amp; Growth",
+        phases: [
+          {
+            title: "Version Control &amp; Domain Strategy",
+            paras: [
+              "A structured Git repository was set up from the start to keep component boundaries clean and support a proper staging workflow — even as a solo project, treating the codebase like something that would need to scale or be handed off. Domain registrars were evaluated directly rather than defaulting to the first option, with custom DNS routing, SSL certificate configuration, TTL optimization, and WHOIS privacy all set up manually to establish a professional, credible brand presence at aquasnailbio.com."
+            ]
+          },
+          {
+            title: "Automated CI/CD",
+            paras: [
+              "The Git repository was connected directly to Vercel, turning every commit into an automated build and edge-network deployment. This closed the loop between local development and live production: no manual deploy step, no drift between what's in the repo and what's live on the CDN."
+            ]
+          },
+          {
+            title: "Analytics, SEO &amp; Organic Growth",
+            paras: [
+              "The app was marked up with semantic HTML5 and JSON-LD structured data specifically tailored to aquatic-care search intent, targeting the long-tail, low-competition queries that dominate this niche. Google Analytics 4 was configured with custom event tracking beyond default pageviews — instrumenting calculator usage, tab toggles, and dwell time specifically, to measure real engagement with the interactive tools rather than just traffic volume. <!-- HIDDEN FIG_03 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span> -->"
+            ],
+            bullets: [
+              "<strong>Community-driven growth</strong> — rather than paid acquisition, the live app was distributed directly into targeted aquatic communities, like relevant subreddits and specialty breeding forums, reaching an audience with genuinely high intent and driving organic traffic at zero ad spend."
+            ]
+          }
+        ]
+      },
+      {
+        headingRaw: "05 / Reflections",
+        paras: [
+          "This project is a working demonstration of full-spectrum AI ownership: a single design engineer, orchestrating a multi-AI toolchain — Gemini for domain synthesis, Stitch and Claude for UI exploration and code generation — across the entire product lifecycle. Research, prototyping, full-stack coding, domain and CI/CD infrastructure, and GA4-driven analytics were all executed solo, with each AI tool applied where it had the clearest structural advantage rather than treated as a general-purpose crutch."
+        ],
+        closing: "The takeaway isn't that AI wrote this product. It's that AI collapsed the time between having a real problem and shipping a real, measurable solution to it — without trading away engineering rigor or product quality to get there. That compression, applied deliberately, is what an AI-native design engineering workflow actually looks like in practice."
+      }
+    ],
+    figs: [
+      ["FIG_01: DOMAIN_DATA_MODEL", "0.46MB", "images/tank.svg", "auto"]
+      /* HIDDEN — restore by uncommenting:
+      ,["FIG_02: CALCULATOR_UI", "0.71MB"],
+      ["FIG_03: GA4_EVENT_MAP", "0.39MB"]
+      */
+    ]
+  }
+];
+
+/* Left-sidebar groups. Order here controls the order groups render in;
+   each project's own `category` field controls which group it falls into. */
+const CATEGORIES = [
+  { id: "enterprise", title: "Enterprise Case Studies", subtitle: "Corporate &amp; System Architecture" },
+  { id: "independent", title: "Independent &amp; Labs", subtitle: "Self-Initiated &amp; Design Engineering" }
+];
+
+/* ---------------------------------------------------------
+   RENDERING
+--------------------------------------------------------- */
+let currentView = "case"; // "case" | "about"
+let currentProject = PROJECTS[0].id;
+let currentFigs = [];        // figs of the project currently on screen
+let activeFigIndex = 0;      // which fig is "active" (stack mode's visible slot)
+let figMode = loadFigMode(); // "stack" | "vertical" — persisted across projects/sessions
+let figResizeTimer = null;
+
+function loadFigMode(){
+  try {
+    const saved = localStorage.getItem("portfolioFigMode");
+    if (saved === "stack" || saved === "vertical") return saved;
+  } catch(e){ /* localStorage unavailable — fall back to default */ }
+  return "stack";
+}
+
+function saveFigMode(mode){
+  try { localStorage.setItem("portfolioFigMode", mode); } catch(e){ /* ignore */ }
+}
+
+/* ---------------------------------------------------------
+   PASSWORD-PROTECTED PAGES (Tech Partner / Reimagine / Enterprise Design)
+--------------------------------------------------------- */
+// SHA-256 hash of the real password — never put the plaintext password in
+// this file. To set your own password, run this in any browser console
+// and paste the printed hash in below:
+//
+//   crypto.subtle.digest("SHA-256", new TextEncoder().encode("your-password-here"))
+//     .then(buf => console.log(Array.from(new Uint8Array(buf))
+//       .map(b => b.toString(16).padStart(2, "0")).join("")));
+//
+// Demo password for this placeholder hash: "resume2026"
+const PASSWORD_HASH = "c5a656f1ac082a1f7ff4d1c931f88a5b87b6580b8ccd8d5611694340222f818d";
+const SESSION_UNLOCK_KEY = "portfolio_unlocked";
+
+async function sha256Hex(text){
+  const data = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function isUnlocked(){
+  try { return sessionStorage.getItem(SESSION_UNLOCK_KEY) === "true"; }
+  catch(e){ return false; }
+}
+
+function markUnlocked(){
+  try { sessionStorage.setItem(SESSION_UNLOCK_KEY, "true"); } catch(e){ /* ignore */ }
+}
+
+function isCurrentPageLocked(){
+  const project = PROJECTS.find(p => p.id === currentProject);
+  return currentView === "case" && !!(project && project.protected) && !isUnlocked();
+}
+
+// Keeps the paywall overlay's bounds hugging exactly against the header's
+// bottom border, the footer's top border, and the sidebar's right edge —
+// so all three stay visible and clickable no matter where the page is
+// scrolled to. Recomputed on open, on scroll, and on resize (header/footer
+// aren't sticky, so their on-screen position genuinely changes as the page
+// scrolls — this tracks that rather than assuming a fixed page-load value).
+function positionPaywallOverlay(){
+  const overlay = document.getElementById("password-overlay");
+  if (!overlay || !overlay.classList.contains("open")) return;
+
+  const header = document.querySelector("header.top");
+  const footer = document.querySelector(".footer");
+  const sidebar = document.querySelector(".sidebar");
+  const vh = window.innerHeight;
+
+  const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+  const footerTop = footer ? footer.getBoundingClientRect().top : vh;
+  const bottomGap = Math.max(0, vh - footerTop);
+
+  overlay.style.top = headerBottom + "px";
+  overlay.style.bottom = bottomGap + "px";
+
+  if (sidebar && getComputedStyle(sidebar).display !== "none") {
+    overlay.style.left = sidebar.getBoundingClientRect().right + "px";
+  } else {
+    overlay.style.left = "0px";
+  }
+}
+
+// Applies (or clears) the blur/lock state for the page currently on screen.
+// Only #main-content and #right-sidebar are ever touched — header and
+// sidebar navigation stay fully interactive regardless of lock state. The
+// visual blur is a separate curtain layer (backdrop-filter), so the real
+// content's layout — including sticky figure positioning — is never
+// altered by lock state; it stays accurate whether locked or not.
+function updateProtectionUI(){
+  const shouldLock = isCurrentPageLocked();
+
+  document.getElementById("main-content").classList.toggle("is-locked", shouldLock);
+  document.getElementById("right-sidebar").classList.toggle("is-locked", shouldLock);
+  document.getElementById("main-blur-curtain").classList.toggle("active", shouldLock);
+  document.getElementById("right-blur-curtain").classList.toggle("active", shouldLock);
+  document.getElementById("password-overlay").classList.toggle("open", shouldLock);
+  if (shouldLock) positionPaywallOverlay();
+
+  const errorEl = document.getElementById("password-error");
+  const inputEl = document.getElementById("password-input");
+  if (shouldLock) {
+    if (errorEl) errorEl.textContent = "";
+    if (inputEl) { inputEl.value = ""; setTimeout(() => inputEl.focus(), 50); }
+  }
+}
+
+async function submitPassword(){
+  const inputEl = document.getElementById("password-input");
+  const errorEl = document.getElementById("password-error");
+  const submitBtn = document.getElementById("password-submit");
+  const value = inputEl.value;
+  if (!value) {
+    errorEl.textContent = "Please enter a password.";
+    return;
+  }
+  if (!window.crypto || !window.crypto.subtle) {
+    // Web Crypto's subtle.digest requires a secure context (https:// or
+    // localhost) — it's unavailable if this file is opened directly via
+    // file://. Host it (even a simple static host) to enable this.
+    errorEl.textContent = "Password check unavailable in this environment (requires https:// hosting).";
+    return;
+  }
+  submitBtn.disabled = true;
+  try {
+    const hash = await sha256Hex(value);
+    if (hash === PASSWORD_HASH) {
+      markUnlocked();
+      updateProtectionUI(); // re-checks isUnlocked() → unlocks immediately
+    } else {
+      errorEl.textContent = "Incorrect password. Please try again.";
+      inputEl.value = "";
+      inputEl.focus();
+    }
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+function renderNav(){
+  const container = document.getElementById("nav-groups");
+  const activeProject = PROJECTS.find(p => p.id === currentProject);
+  const activeCategoryId = (currentView === "case" && activeProject) ? activeProject.category : null;
+  container.innerHTML = CATEGORIES.map(cat => {
+    const items = PROJECTS.filter(p => p.category === cat.id);
+    if (!items.length) return "";
+    const isActiveCat = cat.id === activeCategoryId;
+    return `
+      <div class="nav-category ${isActiveCat ? 'is-active-category' : 'is-inactive-category'}">
+        <div class="sidebar-title">${cat.title}</div>
+        <div class="sidebar-sub">${cat.subtitle}</div>
+        <ul class="nav-list">
+          ${items.map(p => `
+            <li class="nav-item ${currentView==='case' && currentProject===p.id ? 'active':''}" onclick="selectProject('${p.id}')">
+              <span class="label-text">${p.num}. ${p.navLabel}</span>
+            </li>
+          `).join("")}
+        </ul>
+      </div>
+    `;
+  }).join("");
+}
+
+// Full-screen mobile nav overlay: "Case Studies" as a top-level link,
+// followed by the same category groupings as the desktop sidebar, then
+// "My Story". Rendered once — item content doesn't depend on which
+// project is currently open, so no need to re-render on every navigation.
+function renderMobileMenu(){
+  const container = document.getElementById("mobile-menu-content");
+  if (!container) return;
+  const activeProject = PROJECTS.find(p => p.id === currentProject);
+  const activeCategoryId = (currentView === "case" && activeProject) ? activeProject.category : null;
+  const categoriesHtml = CATEGORIES.map(cat => {
+    const items = PROJECTS.filter(p => p.category === cat.id);
+    if (!items.length) return "";
+    const isActiveCat = cat.id === activeCategoryId;
+    return `
+      <div class="mobile-menu-category ${isActiveCat ? 'is-active-category' : ''}">
+        <div class="mobile-menu-cat-title">${cat.title}</div>
+        <div class="mobile-menu-links">
+          ${items.map(p => `<a class="mobile-menu-link ${currentView==='case' && currentProject===p.id ? 'active':''}" onclick="selectProjectFromMenu('${p.id}')">${p.num}. ${p.navLabel}</a>`).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+  container.innerHTML = `
+    <a class="mobile-menu-top-link ${currentView==='case' ? 'active':''}" onclick="showCaseStudiesFromMenu()">Case Studies</a>
+    ${categoriesHtml}
+    <a class="mobile-menu-top-link ${currentView==='about' ? 'active':''}" onclick="showAboutFromMenu()">My Story</a>
+  `;
+}
+
+function toggleMobileMenu(){
+  const menu = document.getElementById("mobile-menu");
+  const btn = document.getElementById("hamburger-btn");
+  const willOpen = !menu.classList.contains("open");
+  menu.classList.toggle("open", willOpen);
+  btn.classList.toggle("open", willOpen);
+  btn.setAttribute("aria-expanded", String(willOpen));
+  document.body.style.overflow = willOpen ? "hidden" : "";
+}
+
+function closeMobileMenu(){
+  document.getElementById("mobile-menu").classList.remove("open");
+  document.getElementById("hamburger-btn").classList.remove("open");
+  document.getElementById("hamburger-btn").setAttribute("aria-expanded", "false");
+  document.body.style.overflow = "";
+}
+
+function selectProjectFromMenu(id){ closeMobileMenu(); selectProject(id); }
+function showCaseStudiesFromMenu(){ closeMobileMenu(); showCaseStudies(); }
+function showAboutFromMenu(){ closeMobileMenu(); showAbout(); }
+
+
+function renderMeta(meta){
+  return `<p class="body-text"><em>${meta.map(m=>`<strong>${m[0]}:</strong> ${m[1]}`).join(' &nbsp;·&nbsp; ')}</em></p>`;
+}
+
+function renderKpis(kpis){
+  return `<div class="kpi-grid">${kpis.map(k=>`
+    <div class="kpi-cell">
+      <div class="kpi-label">${k[0]}</div>
+      <div class="kpi-value">${k[1]}</div>
+      <div class="kpi-desc">${k[2]}</div>
+    </div>`).join("")}</div>`;
+}
+
+function renderSection(s){
+  const headText = s.headingRaw ? s.headingRaw.toUpperCase() : `${s.num} / ${s.heading.toUpperCase()}`;
+  let html = "";
+  if (s.boundaryFor) html += `<span class="fig-boundary" data-fig-boundary="${s.boundaryFor}"></span>`;
+  html += `<div class="section-head"${s.anchorFor ? ` data-fig-anchor="${s.anchorFor}"` : ""}>${headText}</div>`;
+  if (s.paras) html += s.paras.map(p=>`<p class="body-text">${p}</p>`).join("");
+  if (s.quote) html += `<blockquote class="pull">"${s.quote}"</blockquote>`;
+  if (s.bullets) html += `<ul class="bullets">${s.bullets.map(b=>`<li>${b}</li>`).join("")}</ul>`;
+  if (s.phases){
+    html += s.phases.map(ph => `
+      ${ph.boundaryFor ? `<span class="fig-boundary" data-fig-boundary="${ph.boundaryFor}"></span>` : ""}
+      <div class="phase-head"${ph.anchorFor ? ` data-fig-anchor="${ph.anchorFor}"` : ""}>${ph.title}</div>
+      ${(ph.paras||[]).map(p=>`<p class="body-text">${p}</p>`).join("")}
+      ${ph.bullets ? `<ul class="bullets">${ph.bullets.map(b=>`<li>${b}</li>`).join("")}</ul>` : ""}
+      ${(ph.after||[]).map(p=>`<p class="body-text">${p}</p>`).join("")}
+    `).join("");
+  }
+  if (s.closing) html += `<p class="body-text">${s.closing}</p>`;
+  return html;
+}
+
+/* ---------- Right column: mode switcher + stack card / vertical feed ---------- */
+
+// "FIG_01: 3-TIER_IA_MAP" -> "FIG_01"
+function figCode(label){
+  return label.split(":")[0].trim();
+}
+
+function renderModeSwitch(){
+  return `
+    <div class="fig-mode-switch">
+      <button type="button" class="fig-mode-btn ${figMode==='stack'?'active':''}" title="Stack view" aria-label="Stack view" onclick="setFigMode('stack')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="5.5" height="16" rx="1"/>
+          <rect x="9.25" y="4" width="5.5" height="16" rx="1"/>
+          <rect x="16.5" y="4" width="5.5" height="16" rx="1"/>
+        </svg>
+      </button>
+      <button type="button" class="fig-mode-btn ${figMode==='vertical'?'active':''}" title="Vertical view" aria-label="Vertical view" onclick="setFigMode('vertical')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="3" width="16" height="4.5" rx="1"/>
+          <rect x="4" y="9.75" width="16" height="4.5" rx="1"/>
+          <rect x="4" y="16.5" width="16" height="4.5" rx="1"/>
+        </svg>
+      </button>
+    </div>
+  `;
+}
+
+function figPlaceholderSvg(size){
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+      <rect x="3" y="4" width="18" height="16" rx="1.5"/>
+      <circle cx="9" cy="10" r="1.6"/>
+      <path d="M4 17l5-5 4 4 3-3 4 4"/>
+    </svg>
+  `;
+}
+
+// f = [label, size, imgSrc?]. If an image path is present, render a real
+// <img> (object-fit handled in CSS); otherwise fall back to the placeholder
+// icon so figs without an image path yet still render normally.
+function figMediaHtml(f, placeholderSize){
+  const src = f[2];
+  if (src) return `<img src="${src}" alt="${f[0]}" loading="lazy">`;
+  return figPlaceholderSvg(placeholderSize);
+}
+
+// Mode A — all figures live inside one sticky card with a tab switcher.
+function renderFigCard(figs){
+  return `
+    <div class="fig-card" id="fig-card">
+      <div class="fig-tabs">
+        ${figs.map((f,i)=>`<button type="button" class="fig-tab ${i===0?'active':''}" data-idx="${i}" onclick="setActiveFig(${i})">${figCode(f[0])}</button>${i<figs.length-1?'<span class="fig-tab-sep">|</span>':''}`).join("")}
+      </div>
+      <div class="fig-stage" id="fig-stage" onclick="openLightbox()">
+        ${figs.map((f,i)=>`
+          <div class="fig-img ${i===0?'active':''}" data-idx="${i}">
+            ${figMediaHtml(f, 34)}
+          </div>
+        `).join("")}
+      </div>
+      <div class="fig-cap"><b id="fig-cap-label">${figs[0][0]}</b></div>
+    </div>
+  `;
+}
+
+// Mode B — figures unstack into a vertical feed. By default each item is
+// independently sticky so it pins while its matching section of text is
+// being read (see .fig-item). Projects can opt into a "static" layout
+// instead (via p.figVerticalLayout === "static") where items don't pin —
+// useful when a figure is too tall for sticky-tracking to feel good; each
+// item is simply positioned (via margin-top) to line up with its anchor
+// and then scrolls normally with the page.
+function renderFigListVertical(figs, layoutMode){
+  const isStatic = layoutMode === "static";
+  return `
+    <div class="fig-vertical-list">
+      ${figs.map((f,i)=>`
+        <div class="fig-item-wrap" data-idx="${i}" data-fig-code="${figCode(f[0])}">
+          <div class="fig-item ${isStatic ? 'fig-item--static' : ''}" id="fig-item-${i}">
+            <div class="fig-stage ${f[3]==='auto' ? 'fig-stage--auto' : ''}" onclick="openLightboxAt(${i})">
+              <div class="fig-img active">${figMediaHtml(f, 34)}</div>
+            </div>
+            <div class="fig-cap"><b>${f[0]}</b></div>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderRightSidebar(p){
+  currentFigs = p.figs;
+  activeFigIndex = 0;
+  const right = document.getElementById("right-sidebar");
+  const rightWrap = right.closest(".right-wrap");
+  right.classList.toggle("mode-vertical", figMode === "vertical");
+  if (rightWrap) rightWrap.classList.toggle("mode-vertical", figMode === "vertical");
+  right.innerHTML = renderModeSwitch() + (figMode === "vertical" ? renderFigListVertical(p.figs, p.figVerticalLayout) : renderFigCard(p.figs));
+  document.getElementById("right-divider").style.display = "";
+  right.style.display = "";
+  if (figMode === "vertical") {
+    syncCurrentFigLayout();
+    // Late text reflow (e.g. the web font finishing its swap-in after the
+    // first paint) can shift anchor positions after this initial pass —
+    // re-measure shortly after to correct for it.
+    setTimeout(() => { if (figMode === "vertical") syncCurrentFigLayout(); }, 350);
+  }
+}
+
+// User's chosen display mode persists across project switches (and reloads).
+function setFigMode(mode){
+  if (mode !== "stack" && mode !== "vertical") return;
+  if (mode === figMode) return;
+  figMode = mode;
+  saveFigMode(mode);
+  const project = PROJECTS.find(pr=>pr.id===currentProject);
+  if (project) renderRightSidebar(project);
+}
+
+// Anchor point (document Y) for a given fig code. Priority:
+//   1. An explicit element carrying [data-fig-anchor="CODE"] — either a real
+//      heading (e.g. a .phase-head) or a zero-size inline marker placed at
+//      a precise word — whichever a fig should align with (most precise).
+//   2. Otherwise, the top of the paragraph containing its [FIG_0X] badge —
+//      so an image still starts pinning as its section *begins*, even
+//      though the clickable badge itself sits at the end of that text.
+// Returns null if the project has no anchor or hotspot for this fig at all
+// (e.g. a lead/cover image with nothing to bind to).
+function figAnchorTop(code){
+  const explicit = document.querySelector(`#main-content [data-fig-anchor="${code}"]`);
+  if (explicit) return explicit.getBoundingClientRect().top + window.scrollY;
+  const link = document.querySelector(`#main-content .fig-link[data-fig="${code}"]`);
+  if (!link) return null;
+  const anchorEl = link.closest("p") || link;
+  return anchorEl.getBoundingClientRect().top + window.scrollY;
+}
+
+// Position (document Y) of an explicit "stop here" boundary for a fig code,
+// if the project defines one via a section's `boundaryFor` field. Used to
+// cap the last figure's span so it can't bleed into a following section
+// that has no figure of its own.
+function figBoundaryTop(code){
+  const marker = document.querySelector(`#main-content .fig-boundary[data-fig-boundary="${code}"]`);
+  if (!marker) return null;
+  return marker.getBoundingClientRect().top + window.scrollY;
+}
+
+// Stack-mode scroll-driven tab switching, with an intentionally asymmetric
+// trigger point: scrolling further DOWN the page only switches to a figure
+// once its anchor has actually travelled well up into the viewport (~60%
+// of the way down from the top) — so the reader has to have genuinely
+// reached that section, not just glimpsed its first line at the bottom
+// edge. Scrolling back UP keeps the looser, already-comfortable trigger
+// used before (~20% down), since that direction wasn't reported as an
+// issue. Runs on scroll, throttled to one check per animation frame.
+let figLastScrollY = window.scrollY;
+let figScrollRAF = null;
+
+function updateActiveFigFromScroll(){
+  if (figMode !== "stack" || !currentFigs.length) return;
+
+  const currentY = window.scrollY;
+  const direction = currentY >= figLastScrollY ? "down" : "up";
+  figLastScrollY = currentY;
+
+  const vh = window.innerHeight;
+  const threshold = direction === "down" ? vh * 0.60 : vh * 0.20;
+
+  let candidateIdx = null;
+  currentFigs.forEach((f, i) => {
+    const top = figAnchorTop(figCode(f[0]));
+    if (top === null) return;
+    const viewportTop = top - currentY;
+    if (viewportTop <= threshold) candidateIdx = i; // last (furthest) match wins
+  });
+
+  if (candidateIdx !== null && candidateIdx !== activeFigIndex) {
+    setActiveFig(candidateIdx, false);
+  }
+}
+
+function onFigScroll(){
+  if (figScrollRAF) return;
+  figScrollRAF = requestAnimationFrame(() => {
+    figScrollRAF = null;
+    updateActiveFigFromScroll();
+  });
+}
+
+// In vertical mode, size each figure's wrapper to roughly match the length
+// of its corresponding text passage, so each image's *top edge* lines up
+// with its matching sentence/heading on the left as that section begins,
+// and hands off to the next figure once the next section starts.
+//
+// Important: the right column's figure stack and the left column's text
+// don't start at the same Y position (the left column has an eyebrow/title
+// above its first paragraph that the right column doesn't have an
+// equivalent of), so wrap[0]'s span can't be measured anchor-to-anchor
+// like the rest — it has to be measured from the right column's own true
+// starting position down to fig[1]'s text anchor. Every wrap after that
+// chains correctly because, once wrap[0] is sized right, wrap[1] lands
+// exactly on its own text anchor, and so on down the stack.
+function syncVerticalFigHeights(){
+  const wraps = Array.from(document.querySelectorAll("#right-sidebar .fig-item-wrap"));
+  if (!wraps.length) return;
+
+  // Reset first so measurements reflect natural (un-stretched) layout.
+  wraps.forEach(w => { w.style.minHeight = ""; });
+  void document.body.offsetHeight; // force reflow
+
+  // Real text-side anchor for each fig (null if this fig has none at all).
+  const textAnchors = wraps.map((wrap, i) => {
+    const code = currentFigs[i] ? figCode(currentFigs[i][0]) : null;
+    return code ? figAnchorTop(code) : null;
+  });
+
+  // Where the figure stack itself actually begins on screen — fixed, and
+  // deliberately NOT the same as fig[0]'s own text anchor (see note above).
+  const columnStart = wraps[0].getBoundingClientRect().top + window.scrollY;
+
+  wraps.forEach((wrap, i) => {
+    const item = wrap.querySelector(".fig-item");
+    const itemHeight = item ? item.offsetHeight : 300;
+    const code = currentFigs[i] ? figCode(currentFigs[i][0]) : null;
+    const startPos = i === 0 ? columnStart : textAnchors[i];
+    const nextPos = textAnchors[i+1];
+    const base = startPos != null ? startPos : (wrap.getBoundingClientRect().top + window.scrollY);
+    const boundary = code ? figBoundaryTop(code) : null;
+
+    const candidates = [];
+    if (startPos != null && nextPos != null && nextPos > startPos) {
+      candidates.push(nextPos - startPos);
+    }
+    if (boundary !== null && boundary > base) {
+      candidates.push(boundary - base);
+    }
+
+    let span;
+    if (candidates.length) {
+      span = Math.min(...candidates);
+    } else {
+      span = Math.max(window.innerHeight, itemHeight + 200);
+    }
+    wrap.style.minHeight = Math.max(span, itemHeight + 40) + "px";
+  });
+}
+
+// Non-sticky counterpart to syncVerticalFigHeights(), used when a project's
+// figVerticalLayout is "static" (e.g. an image too tall for the pin/release
+// effect to feel good). Instead of computing a wrap height to hold a
+// sticky item in place, this pushes each item down (via margin-top) until
+// its top lines up with its own anchor, then leaves it in normal flow —
+// it scrolls away with the page like any other content, no pinning.
+// Items with no anchor at all (e.g. a figure meant to just stack directly
+// under the previous one) get a small fixed gap instead.
+function syncStaticFigPositions(){
+  const wraps = Array.from(document.querySelectorAll("#right-sidebar .fig-item-wrap"));
+  if (!wraps.length) return;
+
+  wraps.forEach(w => { w.style.marginTop = "0px"; });
+  void document.body.offsetHeight; // force reflow
+
+  const DEFAULT_GAP = 28; // px gap used when a fig has no anchor to align to
+
+  wraps.forEach((wrap, i) => {
+    const code = currentFigs[i] ? figCode(currentFigs[i][0]) : null;
+    const anchor = code ? figAnchorTop(code) : null;
+    const rect = wrap.getBoundingClientRect();
+    const naturalTop = rect.top + window.scrollY;
+    let marginTop;
+    if (i === 0) {
+      // Lead/hero figure: always sits at the top of the column, same as
+      // every other project's FIG_01 — never pushed down to align with
+      // its own anchor (that would put it much further down the page).
+      marginTop = 0;
+    } else if (anchor !== null && anchor > naturalTop) {
+      marginTop = anchor - naturalTop;
+    } else {
+      marginTop = DEFAULT_GAP;
+    }
+    wrap.style.marginTop = marginTop + "px";
+    void document.body.offsetHeight; // reflow so the next item measures correctly
+  });
+}
+
+// Runs whichever vertical-layout sync applies to the currently-rendered
+// project (sticky span-chaining by default, or static margin positioning
+// for projects that opt into figVerticalLayout: "static").
+function syncCurrentFigLayout(){
+  const project = PROJECTS.find(p => p.id === currentProject);
+  if (project && project.figVerticalLayout === "static") {
+    syncStaticFigPositions();
+  } else {
+    syncVerticalFigHeights();
+  }
+}
+
+// Highlight (and, in stack mode, switch to) figure index `idx`.
+// Keeps the active tab visible in the horizontally-scrolling tab strip, and
+// also peeks the *next* tab into view when it would otherwise overflow the
+// right edge (e.g. activating FIG_06 reveals FIG_07), or the *previous*
+// tab when it would overflow the left edge (e.g. activating FIG_02 reveals
+// FIG_01) — same code path whether triggered by a click or by scrolling.
+function scrollTabIntoView(idx){
+  const container = document.querySelector("#fig-card .fig-tabs");
+  if (!container) return;
+  const tabs = container.querySelectorAll(".fig-tab");
+  const activeTab = tabs[idx];
+  if (!activeTab) return;
+  const prevTab = tabs[idx-1] || activeTab;
+  const nextTab = tabs[idx+1] || activeTab;
+  const cRect = container.getBoundingClientRect();
+  const pRect = prevTab.getBoundingClientRect();
+  const nRect = nextTab.getBoundingClientRect();
+  const PEEK = 12; // small breathing-room margin, px
+
+  if (nRect.right > cRect.right){
+    container.scrollBy({ left: nRect.right - cRect.right + PEEK, behavior: "smooth" });
+  } else if (pRect.left < cRect.left){
+    container.scrollBy({ left: pRect.left - cRect.left - PEEK, behavior: "smooth" });
+  }
+}
+
+function setActiveFig(idx, highlight){
+  if (!currentFigs[idx]) return;
+  activeFigIndex = idx;
+
+  if (figMode === "vertical"){
+    document.querySelectorAll("#right-sidebar .fig-item").forEach((el,i)=>{
+      el.classList.toggle("is-highlighted", !!highlight && i===idx);
+    });
+    return;
+  }
+
+  document.querySelectorAll("#fig-card .fig-tab").forEach((t,i)=>t.classList.toggle("active", i===idx));
+  document.querySelectorAll("#fig-card .fig-img").forEach((el,i)=>el.classList.toggle("active", i===idx));
+  const labelEl = document.getElementById("fig-cap-label");
+  if (labelEl) labelEl.textContent = currentFigs[idx][0];
+  const card = document.getElementById("fig-card");
+  if (card) card.classList.toggle("is-highlighted", !!highlight);
+  scrollTabIntoView(idx);
+}
+
+function clearFigHighlight(){
+  if (figMode === "vertical"){
+    document.querySelectorAll("#right-sidebar .fig-item.is-highlighted").forEach(el=>el.classList.remove("is-highlighted"));
+  } else {
+    const card = document.getElementById("fig-card");
+    if (card) card.classList.remove("is-highlighted");
+  }
+}
+
+// Hovering an inline [FIG_0X] badge in the narrative highlights (and, in
+// stack mode, switches to) the matching figure. Scroll-driven switching is
+// handled separately by updateActiveFigFromScroll() (direction-aware).
+// Bound once per main-content render (not per mode switch).
+function bindFigHotspots(){
+  document.querySelectorAll("#main-content .fig-link").forEach(el=>{
+    const idx = currentFigs.findIndex(f=>figCode(f[0])===el.dataset.fig);
+    if (idx<0) return;
+    el.addEventListener("mouseenter", ()=>setActiveFig(idx, true));
+    el.addEventListener("mouseleave", clearFigHighlight);
+  });
+}
+
+function openLightboxAt(idx){
+  activeFigIndex = idx;
+  openLightbox();
+}
+
+function openLightbox(){
+  if (!currentFigs[activeFigIndex]) return;
+  const f = currentFigs[activeFigIndex];
+  document.getElementById("lightbox-cap").textContent = f[0];
+  document.getElementById("lightbox-stage").innerHTML = figMediaHtml(f, 72);
+  document.getElementById("lightbox").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeLightbox(){
+  document.getElementById("lightbox").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+// Subtle page-load / project-switch entrance animation for the narrative text.
+function playEntrance(){
+  const el = document.getElementById("main-content");
+  el.classList.remove("is-visible");
+  void el.offsetWidth; // force reflow so the removal takes effect first
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      el.classList.add("is-visible");
+    });
+  });
+}
+
+function renderProject(p){
+  const execHeading = p.execHeading || "Executive Summary";
+  document.getElementById("main-content").innerHTML = `
+    <div class="eyebrow">${p.eyebrow}</div>
+    <h1 class="title">${p.title}${p.status ? `<span class="status-pill">${p.status}</span>`:''}</h1>
+    <p class="subtitle">${p.subtitle}</p>
+    ${renderMeta(p.meta)}
+    <div class="section-head" style="margin-top:46px;">${execHeading.toUpperCase()}</div>
+    ${p.execSummary.map(t=>`<p class="body-text">${t}</p>`).join("")}
+    ${p.kpis ? `<div class="section-head">Key Performance Indicators</div>${renderKpis(p.kpis)}` : ""}
+    ${p.sections.map(renderSection).join("")}
+  `;
+  renderRightSidebar(p);
+  bindFigHotspots();
+  playEntrance();
+}
+
+function renderAbout(){
+  document.getElementById("main-content").innerHTML = `
+    <div class="about-grid">
+      <div class="about-left">
+        <h1 class="about-title">Hello</h1>
+      </div>
+      <div class="about-right">
+        <p class="body-text">I grew up in Nanjing, a beautiful city in southern China where urban life met nature. As a child, I spent countless hours with my parents wandering the mountains, catching beetles, and marveling at the patterns on their backs — each one slightly different, but never random. I used to sit down and sketch everything I saw in my notebook, tracing every line until I understood why it repeated the way it did...</p>
+        <p class="body-text">Years passed, I crossed the ocean to the U.S. Life has taken me from the east coast to the west coast, and now to Central Texas, where I've built a home of my own. I like to take my daughter to feed birds, and one day, when a parakeet gently landed on her hand, she burst into a bright, unguarded laugh. It lasted only a second — but in that second, I saw my own childhood in hers, completely still, completely amazed.</p>
+        <p class="body-text">That second didn't come out of nowhere, though. It took years of watching her before I could even recognize it when it happened. And that's what beauty has always meant to me — not the first shiny impression, but the quiet, slow-building kind that only shows itself if you stay long enough to notice it. It's the same patience I had watching beetles as a kid, and the same one I feel now, watching my daughter watch the world for the first time all over again.</p>
+      </div>
+    </div>
+  `;
+  document.getElementById("right-divider").style.display = "none";
+  document.getElementById("right-sidebar").style.display = "none";
+  currentFigs = [];
+  playEntrance();
+}
+
+function selectProject(id){
+  currentView = "case";
+  currentProject = id;
+  document.body.classList.remove("view-about");
+  document.body.classList.add("view-case");
+  document.getElementById("nav-cases").classList.add("active");
+  document.getElementById("nav-about").classList.remove("active");
+  renderNav();
+  renderMobileMenu();
+  renderProject(PROJECTS.find(p=>p.id===id));
+  updateProtectionUI();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function showCaseStudies(){ selectProject(currentProject); }
+
+function showAbout(){
+  currentView = "about";
+  document.body.classList.remove("view-case");
+  document.body.classList.add("view-about");
+  document.getElementById("nav-cases").classList.remove("active");
+  document.getElementById("nav-about").classList.add("active");
+  renderMobileMenu();
+  renderAbout();
+  updateProtectionUI();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+// init
+document.body.classList.add("view-case");
+renderNav();
+renderMobileMenu();
+renderProject(PROJECTS[0]);
+updateProtectionUI();
+
+document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
+document.getElementById("lightbox").addEventListener("click", (e)=>{
+  if (e.target.id === "lightbox") closeLightbox();
+});
+document.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape") {
+    closeLightbox();
+    closeMobileMenu();
+  }
+});
+
+document.getElementById("password-submit").addEventListener("click", submitPassword);
+document.getElementById("password-input").addEventListener("keydown", (e)=>{
+  if (e.key === "Enter") submitPassword();
+});
+
+window.addEventListener("resize", ()=>{
+  clearTimeout(figResizeTimer);
+  figResizeTimer = setTimeout(()=>{
+    if (figMode === "vertical") syncCurrentFigLayout();
+  }, 150);
+  positionPaywallOverlay();
+});
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => {
+    if (figMode === "vertical") syncCurrentFigLayout();
+  });
+}
+
+window.addEventListener("scroll", onFigScroll, { passive: true });
+
+let paywallScrollRAF = null;
+window.addEventListener("scroll", ()=>{
+  if (paywallScrollRAF) return;
+  paywallScrollRAF = requestAnimationFrame(()=>{
+    paywallScrollRAF = null;
+    positionPaywallOverlay();
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
