@@ -459,6 +459,13 @@
   }
   .fig-link:hover{background:var(--ink);color:#fff;border-color:var(--ink);}
 
+  /* Small-screen waterfall images: plain, no tag/caption/interaction —
+     hidden by default (desktop keeps using the right column as normal)
+     and only shown once that column itself is hidden (see the
+     max-width:1200px breakpoint below). */
+  .mobile-fig{display:none;margin:24px 0;}
+  .mobile-fig img{display:block;width:100%;height:auto;border-radius:8px;}
+
   /* ---------- Lightbox modal ---------- */
   .lightbox{
     position:fixed;inset:0;z-index:1000;
@@ -586,6 +593,8 @@
     .layout{grid-template-columns:220px 1px minmax(0,1fr);}
     .right{display:none;}
     .paywall-blur{left:221px;}
+    .mobile-fig{display:block;}
+    .fig-link{display:none;}
   }
   @media (max-width:840px){
     .top-inner{padding:20px 24px;}
@@ -1876,6 +1885,44 @@ function playEntrance(){
   });
 }
 
+// Small-screen fallback: once the right image column is hidden (see the
+// max-width:1200px breakpoint), each figure that has a real image is
+// inserted as a plain <img> directly after its corresponding anchor point
+// in the main text — heading first if the fig has an explicit anchor
+// (anchorFor / data-fig-anchor), else the paragraph/bullet-list containing
+// its [FIG_0X] badge. No tabs, no captions, no click-to-zoom, no sticky —
+// just a simple waterfall of images between paragraphs. Purely additive:
+// these elements stay display:none until the small-screen media query
+// turns them on, so none of the desktop right-column behavior changes.
+// Because they live inside #main-content, they're automatically covered
+// by the exact same .blur-curtain / lock system already applied there.
+function insertMobileFigures(p){
+  document.querySelectorAll("#main-content .mobile-fig").forEach(el => el.remove());
+  if (!p.figs || !p.figs.length) return;
+
+  p.figs.forEach(f => {
+    const src = f[2];
+    if (!src) return; // skip placeholder-only figs — nothing real to show inline
+
+    const code = figCode(f[0]);
+    let anchorTarget = document.querySelector(`#main-content [data-fig-anchor="${code}"]`);
+
+    if (!anchorTarget) {
+      const link = document.querySelector(`#main-content .fig-link[data-fig="${code}"]`);
+      if (link) {
+        const li = link.closest("li");
+        anchorTarget = link.closest("p") || (li ? li.closest("ul") : null) || link;
+      }
+    }
+    if (!anchorTarget) return; // no clear place to attach this fig on mobile — skip it
+
+    const wrap = document.createElement("div");
+    wrap.className = "mobile-fig";
+    wrap.innerHTML = `<img src="${src}" alt="${f[0]}" loading="lazy">`;
+    anchorTarget.insertAdjacentElement("afterend", wrap);
+  });
+}
+
 function renderProject(p){
   const execHeading = p.execHeading || "Executive Summary";
   document.getElementById("main-content").innerHTML = `
@@ -1891,6 +1938,7 @@ function renderProject(p){
   `;
   renderRightSidebar(p);
   bindFigHotspots();
+  insertMobileFigures(p);
   playEntrance();
 }
 
