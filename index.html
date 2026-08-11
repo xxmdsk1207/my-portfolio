@@ -567,6 +567,20 @@
     .about-title{font-size:clamp(56px, 20vw, 110px);white-space:normal;}
   }
 
+  /* Above ~1440px, .about-title's font-size (20vw, uncapped by .main's own
+     1320px max-width since vw is always relative to the raw viewport) was
+     ballooning fast enough to eat into the text column's share of the
+     "auto 1fr" grid split — the paragraph was getting *narrower* as the
+     screen grew, the opposite of what it should do. Give the page a bit
+     more room, ease Hello's growth curve just enough to stop it from
+     crowding the text, and let the paragraph column widen with the extra
+     space instead. Nothing below this width is affected. */
+  @media (min-width:1441px){
+    body.view-about .main{max-width:1600px;}
+    .about-title{font-size:clamp(140px, 13vw, 300px);}
+    .about-right, .about-right p.body-text{max-width:800px;}
+  }
+
   /* ---------- Responsive ---------- */
   @media (max-width:1200px){
     .layout{grid-template-columns:220px 1px minmax(0,1fr);}
