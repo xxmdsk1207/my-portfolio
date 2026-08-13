@@ -551,7 +551,6 @@
     align-items:start;
     margin-top:96px;
   }
-  .about-left{}
   .about-title{
     font-family:var(--serif);
     font-size:clamp(140px, 20vw, 380px);
@@ -710,10 +709,21 @@ const PROJECTS = [
     sections: [
       {
         headingRaw: "02/Why this was harder than it looked on paper",
-        paras: [
-          "Two things made this project genuinely difficult, and neither of them was about visual design.",
-          "<!-- HIDDEN FIG_02 anchor — restore by removing this comment: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_02\"></span> --><strong>No anchor to react to.</strong> Most redesigns have a predecessor to critique — you can point at what's confusing and propose something better. Here, there wasn't a clean interface to react to, but there wasn't nothing either: a platform did exist, it just didn't support much beyond the bare minimum. Registering as a merchant meant filling out long forms; submitting evidence meant uploading files and then waiting — a slow, people-heavy process stitched on top of software that couldn't carry it on its own. The UI itself hadn't been touched in years: dense forms and stacked cards with no real hierarchy. Every flow and edge case still had to be invented from scratch, then tested against whether it held up without a human on the other end to explain things. <!-- HIDDEN FIG_02 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span> --> The real task was building a chargeback platform from nothing, covering everything the managed service used to handle while opening new ground it never touched.",
-          "<!-- HIDDEN FIG_03 anchor — restore by removing this comment: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_03\"></span> --><strong>The platform also had to serve several different roles at once, coherently.</strong> DR's real fault line wasn't between two flavors of the same job — it was between two fundamentally different audiences sharing one system under role-based access control. Merchants are the platform's external customers, logging in to review disputes, work the AI-assisted evidence flow, and decide whether to fight a case or let it go. Internal Operators — the risk and platform team — sit behind that layer, monitoring SLAs across the whole portfolio and configuring the automation that drives it. Same system, two audiences with almost nothing in common in terms of what they came to do. <!-- HIDDEN FIG_03 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span> -->"
+        blocks: [
+          { type: "p", text: "Two things made this project genuinely difficult, and neither of them was about visual design." },
+          { type: "p", text: "<!-- HIDDEN FIG_02 anchor — restore by removing this comment: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_02\"></span> --><strong>No anchor to react to.</strong> Most redesigns have a predecessor to critique, meaning you can point at what's confusing and propose something better. Here, there wasn't a clean interface to react to: the old platform did exist — it just didn't support much beyond the bare minimum. The issues were:" },
+          { type: "ul", items: [
+            "Registering as a merchant meant filling out long forms.",
+            "Submitting evidence meant uploading files and then waiting — a slow, people-heavy process stitched on top of software that couldn't carry it on its own.",
+            "The UI itself hadn't been touched in years: dense forms and stacked cards with no real hierarchy."
+          ]},
+          { type: "p", text: "Every flow and edge case still had to be invented from scratch, then tested against whether it held up without a human on the other end to explain things. <!-- HIDDEN FIG_02 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_02\">[FIG_02]</span> -->" },
+          { type: "p", text: "<!-- HIDDEN FIG_03 anchor — restore by removing this comment: <span class=\"fig-anchor\" data-fig-anchor=\"FIG_03\"></span> --><strong>The platform also had to serve several different roles at once, coherently.</strong> DR's real fault line wasn't between two flavors of the same job — it was between two fundamentally different audiences sharing one system under role-based access control." },
+          { type: "ul", items: [
+            "<strong>Merchants</strong> are the platform's external customers: they log in to review disputes, work the AI-assisted evidence flow, and decide whether to fight a case or let it go.",
+            "<strong>Internal Operators</strong>, the risk and platform team, sit behind that layer, monitoring SLAs across the whole portfolio and configuring the automation that drives it."
+          ]},
+          { type: "p", text: "Same system, two audiences with almost nothing in common in terms of what they came to do. <!-- HIDDEN FIG_03 badge — restore by removing this comment: <span class=\"fig-link\" data-fig=\"FIG_03\">[FIG_03]</span> -->" }
         ]
       },
       {
@@ -915,7 +925,7 @@ const PROJECTS = [
     eyebrow: "Case Study / Accessibility & Design Systems",
     title: "Enterprise Design System Refactoring for WCAG 2.1 & ADA Compliance",
     status: null,
-    subtitle: "<span class=\"fig-anchor\" data-fig-anchor=\"FIG_01\"></span>Rebuilding six state-heavy components and template — Button, Tab Menu, Tab, Icon Menu, Month-Year Picker, and Search Template — so every consuming team inherits AA compliance by default. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>",
+    subtitle: "<span class=\"fig-anchor\" data-fig-anchor=\"FIG_01\"></span>Rebuilding 50+ state-heavy components and template, so every consuming team inherits AA compliance by default. <span class=\"fig-link\" data-fig=\"FIG_01\">[FIG_01]</span>",
     meta: [
       ["Role", "UX Designer &amp; Design Engineer"],
       ["Scope", "Design System Architecture · Accessibility Standards (WCAG 2.1 AA) · Component Refactoring · Responsive Reflow · Agile Dev Collaboration"],
@@ -931,8 +941,7 @@ const PROJECTS = [
       {
         headingRaw: "02 / Governance &amp; Team Alignment",
         paras: [
-          "Refactoring a design system with four people working in parallel carries an obvious risk: without shared conventions, four components can end up encoding the same accessibility rule four slightly different ways. Before any component work began, the team established a shared Style Guide — a single source of truth for focus ring treatment, error-state color and iconography, disabled-state opacity, and naming conventions for states — plus a Component Specification template so a component built by any of the three designers was structurally identical in how it communicated intent to engineering.",
-          "This governance layer is easy to undervalue in a case study because it doesn't produce a screenshot, but it's the reason the final library reads as one coherent system rather than four designers' individual interpretations stitched together."
+          "Refactoring a design system with four people working in parallel carries an obvious risk: without shared conventions, components can end up encoding the same accessibility rule with slightly different ways. Before any component work began, the team established a shared Style Guide — a single source of truth for focus ring treatment, error-state color and iconography, disabled-state opacity, and naming conventions for states — plus a Component Specification template so a component built by any of the three designers was structurally identical in how it communicated intent to engineering."
         ]
       },
       {
@@ -1473,6 +1482,13 @@ function renderSection(s){
   let html = "";
   if (s.boundaryFor) html += `<span class="fig-boundary" data-fig-boundary="${s.boundaryFor}"></span>`;
   html += `<div class="section-head"${s.anchorFor ? ` data-fig-anchor="${s.anchorFor}"` : ""}>${headText}</div>`;
+  if (s.blocks){
+    html += s.blocks.map(b => {
+      if (b.type === "p") return `<p class="body-text">${b.text}</p>`;
+      if (b.type === "ul") return `<ul class="bullets">${b.items.map(i=>`<li>${i}</li>`).join("")}</ul>`;
+      return "";
+    }).join("");
+  }
   if (s.paras) html += s.paras.map(p=>`<p class="body-text">${p}</p>`).join("");
   if (s.quote) html += `<blockquote class="pull">"${s.quote}"</blockquote>`;
   if (s.bullets) html += `<ul class="bullets">${s.bullets.map(b=>`<li>${b}</li>`).join("")}</ul>`;
