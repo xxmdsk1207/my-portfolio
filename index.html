@@ -29,6 +29,7 @@
     --line-strong:#1a1a1a;
     --serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --header-h: 72px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -48,11 +49,24 @@
 
   /* ---------- Header ---------- */
   header.top{
-    position:relative;
+    position:sticky;
+    top:0;
     z-index:1000;
     background:var(--bg);
     border-bottom:1px solid var(--line);
     flex-shrink:0;
+    transition:box-shadow .2s ease;
+  }
+  /* Toggled via JS once the page has scrolled even slightly, giving the
+     sticky header a subtle sense of elevation over the content sliding
+     beneath it. No filter/backdrop-filter here on purpose — this site has
+     a known gotcha where filter-family properties turn their element into
+     a new containing block for position:fixed/sticky descendants, which
+     has broken sticky figure positioning before; a plain box-shadow avoids
+     that risk entirely while still achieving the "floats above content"
+     effect that was asked for. */
+  header.top.header-scrolled{
+    box-shadow:0 2px 14px rgba(0,0,0,.07);
   }
   .top-inner{
     display:flex;align-items:center;justify-content:space-between;
@@ -166,13 +180,14 @@
   .divider{background:var(--line);}
   .sidebar{
     --side-pad:48px;padding:44px 8px 44px var(--side-pad);
-    position:relative;z-index:800;background:var(--bg);
+    position:sticky;top:var(--header-h);align-self:start;
+    z-index:800;background:var(--bg);
   }
   .main{padding:44px 56px;min-width:0;position:relative;}
   .right{
     padding:44px 40px 44px 32px;
     position:sticky;
-    top:44px;
+    top:calc(var(--header-h) + 44px);
     align-self:start;
   }
   /* Vertical mode lifts the sticky constraint off the whole column — each
@@ -296,7 +311,7 @@
   /* Mode switcher (Stack / Vertical) pinned to the top of the sidebar,
      independent of which mode is active. */
   .fig-mode-switch{
-    position:sticky;top:44px;z-index:5;
+    position:sticky;top:calc(var(--header-h) + 44px);z-index:5;
     display:flex;gap:6px;
     background:transparent;
     padding-bottom:14px;margin-bottom:8px;
@@ -317,7 +332,7 @@
      mode-switch bar (~44px tall incl. padding) so images never tuck under it. */
   .fig-vertical-list{display:flex;flex-direction:column;}
   .fig-item-wrap{position:relative;}
-  .fig-item{position:sticky;top:88px;padding-bottom:26px;}
+  .fig-item{position:sticky;top:calc(var(--header-h) + 88px);padding-bottom:26px;}
   .fig-item--static{position:static;padding-bottom:26px;}
 
   /* ---------- Left sidebar ---------- */
@@ -2051,6 +2066,24 @@ if (document.fonts && document.fonts.ready) {
 }
 
 window.addEventListener("scroll", onFigScroll, { passive: true });
+
+// Sticky header elevation: adds a subtle shadow once the page has scrolled
+// even slightly, so the header reads as "floating above" the content
+// sliding beneath it. Independent of onFigScroll — its own rAF throttle,
+// touches nothing else.
+let headerScrollRAF = null;
+function updateHeaderScrollState(){
+  const header = document.querySelector("header.top");
+  if (header) header.classList.toggle("header-scrolled", window.scrollY > 4);
+}
+window.addEventListener("scroll", () => {
+  if (headerScrollRAF) return;
+  headerScrollRAF = requestAnimationFrame(() => {
+    headerScrollRAF = null;
+    updateHeaderScrollState();
+  });
+}, { passive: true });
+updateHeaderScrollState();
 </script>
 </body>
 </html>
