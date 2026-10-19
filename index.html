@@ -209,16 +209,25 @@
      within while scrolling (Stack/Horizontal view's whole point). Anchoring
      the curtain to .main/.right directly, as their own child, avoids that
      entirely since neither element's own box/positioning changes at all. */
+  /* COMMENTED OUT — password/blur system disabled (uncomment to restore)
   .main.is-locked, .right.is-locked{
     pointer-events:none;
     user-select:none;
   }
+  */
   /* Sits directly on top of .main / .right's own content (same box, exact
      match, no separate wrapper needed), blurring whatever renders
      underneath via backdrop-filter — a real visual blur with zero effect
      on the content's own layout/positioning. */
+  /* Base rule kept active (display:none) so the curtain element — still
+     created in JS, see renderProject/renderRightSidebar — always stays
+     hidden now that the system below is disabled. Everything that could
+     ever make it visible is commented out. */
   .blur-curtain{
     display:none;
+  }
+  /* COMMENTED OUT — password/blur system disabled (uncomment to restore)
+  .blur-curtain{
     position:absolute;inset:0;
     z-index:50;
     backdrop-filter:blur(12px);
@@ -226,6 +235,7 @@
     pointer-events:none;
   }
   .blur-curtain.active{display:block;}
+  */
 
   /* Full-viewport fixed layer, split in two:
      .paywall-overlay mirrors .layout's own max-width + margin:auto
@@ -244,8 +254,15 @@
      and mobile-menu close button (1001) so those stay reachable; .sidebar
      and .footer also carry their own elevated z-index + opaque background
      (see above / below) as a second, independent safety net. */
+  /* Base rule kept active (display:none) so #password-overlay — still
+     present in the DOM (see HTML, kept for JS null-safety) — always stays
+     hidden now that the system below is disabled. Everything that could
+     ever make it visible is commented out. */
   .paywall-overlay{
     display:none;
+  }
+  /* COMMENTED OUT — password/blur system disabled (uncomment to restore)
+  .paywall-overlay{
     position:fixed;
     top:0;bottom:0;left:0;right:0;
     max-width:1680px;
@@ -307,6 +324,7 @@
     font-family:var(--sans);font-size:12.5px;color:#b3402f;
     margin-top:12px;min-height:16px;
   }
+  */
 
   /* Mode switcher (Stack / Vertical) pinned to the top of the sidebar,
      independent of which mode is active. */
@@ -523,7 +541,7 @@
   .lightbox-close:hover{border-color:#d6d5d0;color:#fff;}
 
   /* ---------- Page-load entrance animation ---------- */
-  .eyebrow, h1.title, p.subtitle, p.body-text, .about-title{
+  .eyebrow, h1.title, p.subtitle, p.body-text, .about-title, .section-head{
     opacity:0;
     transform:translateY(12px);
     transition:opacity .4s cubic-bezier(0.16,1,0.3,1), transform .4s cubic-bezier(0.16,1,0.3,1);
@@ -532,6 +550,7 @@
   #main-content.is-visible h1.title,
   #main-content.is-visible .about-title{opacity:1;transform:translateY(0);transition-delay:.08s;}
   #main-content.is-visible p.subtitle{opacity:1;transform:translateY(0);transition-delay:.14s;}
+  #main-content.is-visible .section-head{opacity:1;transform:translateY(0);transition-delay:.17s;}
   #main-content.is-visible p.body-text{opacity:1;transform:translateY(0);transition-delay:.2s;}
   #main-content.is-visible p.body-text:nth-of-type(2){transition-delay:.24s;}
   #main-content.is-visible p.body-text:nth-of-type(3){transition-delay:.28s;}
@@ -615,7 +634,9 @@
   @media (max-width:1200px){
     .layout{grid-template-columns:220px 1px minmax(0,1fr);}
     .right{display:none;}
+    /* COMMENTED OUT — password/blur system disabled (uncomment to restore)
     .paywall-blur{left:221px;}
+    */
     .mobile-fig{display:block;}
     .fig-link{display:none;}
   }
@@ -626,7 +647,9 @@
     .layout{grid-template-columns:1fr;}
     .divider{display:none;}
     .sidebar{display:none;}
+    /* COMMENTED OUT — password/blur system disabled (uncomment to restore)
     .paywall-blur{left:0;}
+    */
     .main{padding:32px 24px;}
     h1.title{font-size:30px;}
     p.subtitle{font-size:16px;}
@@ -672,6 +695,14 @@
   <aside class="right" id="right-sidebar"></aside>
 </div>
 
+<!-- Password dialog markup kept in the DOM (not removed) because
+     updateProtectionUI() below calls document.getElementById("password-overlay")
+     without a null-check — deleting/commenting this element would throw and
+     break the whole page's JS. Instead, the CSS rules that ever make this
+     dialog/overlay visible are commented out above (search "password/blur
+     system disabled"), so .paywall-overlay stays permanently display:none
+     and this markup is always invisible and non-interactive. Fully
+     reversible: uncomment the CSS to bring it back. -->
 <div class="paywall-overlay" id="password-overlay">
   <div class="paywall-blur">
     <div class="paywall-modal">
